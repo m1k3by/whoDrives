@@ -1,0 +1,25 @@
+name: Release Android
+
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+      - run: npm ci
+        working-directory: mobile
+      # Build in the EAS cloud, then submit to the Play "internal" track (see eas.json).
+      - run: eas build --platform android --profile production --auto-submit --non-interactive --no-wait
+        working-directory: mobile

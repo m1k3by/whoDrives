@@ -1,0 +1,42 @@
+name: OTA update
+
+on:
+  push:
+    branches: [main]
+    paths: ['mobile/**']
+
+concurrency: ota-update
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # If the same push also changed supabase/, ship the app only after the backend.
+      - name: Wait for backend deploy of this commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          run_id=$(gh run list --workflow deploy-backend.yml --commit "$GITHUB_SHA" --json databaseId -q '.[0].databaseId')
+          if [ -n "$run_id" ]; then gh run watch "$run_id" --exit-status; else echo "No backend deploy for this commit"; fi
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+      - run: npm ci
+        working-directory: mobile
+      - run: eas update --channel production --environment production --message "$MESSAGE" --non-interactive
+        working-directory: mobile
+        env:
+          MESSAGE: ${{ github.event.head_commit.message }}
