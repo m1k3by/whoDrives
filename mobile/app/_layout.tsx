@@ -8,7 +8,8 @@ import { useSession } from '@/features/auth/useSession';
 import { Body, Button, Loading, Screen, Title } from '@/ui/components';
 import { t } from '@/ui/strings';
 
-const queryClient = new QueryClient();
+// supabase-js already retries network errors itself; one more retry is enough.
+const queryClient = new QueryClient({ defaultOptions: { queries: { retry: 1 } } });
 
 const PLAY_STORE_URL =
   'https://play.google.com/store/apps/details?id=com.michael_stoecker.whodrives';
@@ -24,7 +25,7 @@ export default function RootLayout() {
 
 function Gate() {
   const updateRequired = useUpdateRequired();
-  const session = useSession();
+  const { session, retry } = useSession();
 
   if (updateRequired) {
     return (
@@ -36,11 +37,28 @@ function Gate() {
     );
   }
   if (session === undefined) return <Loading />;
+  if (session === 'offline') {
+    return (
+      <Screen>
+        <Title>{t.offline.title}</Title>
+        <Body>{t.offline.text}</Body>
+        <Button label={t.common.retry} onPress={retry} />
+      </Screen>
+    );
+  }
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Protected guard={!!session}>
         <Stack.Screen name="index" />
+        <Stack.Screen
+          name="profile"
+          options={{ headerShown: true, title: t.profile.title, headerShadowVisible: false }}
+        />
+        <Stack.Screen
+          name="invite"
+          options={{ headerShown: true, title: t.invite.title, headerShadowVisible: false }}
+        />
       </Stack.Protected>
       <Stack.Protected guard={!session}>
         <Stack.Screen name="login" />

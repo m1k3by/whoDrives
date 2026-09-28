@@ -3,8 +3,28 @@ export const t = {
   appName: 'Who Drives?',
   common: {
     loading: 'Lädt …',
-    genericError: 'Das hat nicht geklappt. Bitte versuche es noch einmal.',
+    genericError:
+      'Das hat nicht geklappt. Bitte prüfe deine Internetverbindung und versuche es noch einmal.',
     retry: 'Nochmal versuchen',
+    cancel: 'Abbrechen',
+  },
+  offline: {
+    title: 'Keine Verbindung',
+    text: 'Die App erreicht den Server gerade nicht. Bitte prüfe deine Internetverbindung und versuche es gleich noch einmal.',
+  },
+  profile: {
+    title: 'Mein Profil',
+    welcomeTitle: 'Willkommen!',
+    welcomeText: 'Wie sollen dich die anderen in der Familie sehen?',
+    nameLabel: 'Dein Name',
+    namePlaceholder: 'z. B. Oma Gisela',
+    nameRequired: 'Bitte gib einen Namen ein.',
+    save: 'Speichern',
+    saved: 'Gespeichert.',
+    loggedInAs: (email: string) => `Angemeldet als ${email}`,
+    logout: 'Abmelden',
+    logoutTitle: 'Abmelden?',
+    logoutText: 'Zum erneuten Anmelden brauchst du wieder einen Code per E-Mail.',
   },
   login: {
     title: 'Anmelden',
@@ -21,12 +41,34 @@ export const t = {
   family: {
     noFamilyTitle: 'Noch keine Familie',
     noFamilyText: 'Lege eine Familie an. Weitere Mitglieder lädst du später per Code ein.',
+    joinText: 'Hast du einen Einladungscode bekommen? Dann gib ihn hier ein.',
+    codeLabel: 'Einladungscode',
+    join: 'Familie beitreten',
+    invalidCode: 'Dieser Code ist ungültig, abgelaufen oder wurde schon benutzt.',
+    orCreate: 'Oder: neue Familie anlegen',
     nameLabel: 'Name der Familie',
     namePlaceholder: 'z. B. Familie Müller',
     create: 'Familie anlegen',
     members: 'Mitglieder',
     unnamedMember: 'Ohne Namen',
     roles: { parent: 'Elternteil', grandparent: 'Großeltern', other: 'Weitere Person' },
+  },
+  invite: {
+    title: 'Mitglied einladen',
+    chooseRole: 'Als was lädst du die Person ein?',
+    roleHint: {
+      parent: 'Kann Termine anlegen und weitere Mitglieder einladen.',
+      grandparent: 'Sieht alle Termine und kann sie übernehmen.',
+      other: 'Sieht alle Termine und kann sie übernehmen.',
+    },
+    create: 'Code erstellen',
+    codeIntro: (role: string) => `Einladungscode (${role}):`,
+    validUntil: (date: string) => `Gilt bis ${date} und nur für eine Person.`,
+    share: 'Code teilen',
+    another: 'Weiteren Code erstellen',
+    shareMessage: (family: string, code: string, date: string) =>
+      `Du bist bei „Who Drives?“ in „${family}“ eingeladen. ` +
+      `Öffne die App, melde dich an und gib diesen Code ein: ${code} (gültig bis ${date}).`,
   },
   update: {
     title: 'Update nötig',

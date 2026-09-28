@@ -1,17 +1,29 @@
-import type { Session } from '@supabase/supabase-js';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { supabase } from '@/lib/supabase';
 
-/** undefined = still loading, null = logged out */
-export function useSession(): Session | null | undefined {
-  const [session, setSession] = useState<Session | null | undefined>(undefined);
+import { loadSession, type SessionState } from './session';
+
+const SESSION_TIMEOUT_MS = 8000;
+
+const load = () => loadSession(() => supabase.auth.getSession(), SESSION_TIMEOUT_MS);
+
+export function useSession(): { session: SessionState; retry: () => void } {
+  const [session, setSession] = useState<SessionState>(undefined);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setSession(data.session));
-    const { data } = supabase.auth.onAuthStateChange((_event, s) => setSession(s));
+    load().then(setSession);
+    const { data } = supabase.auth.onAuthStateChange((event, s) => {
+      // INITIAL_SESSION is handled by load(), which can tell "offline" from "logged out".
+      if (event !== 'INITIAL_SESSION') setSession(s);
+    });
     return () => data.subscription.unsubscribe();
   }, []);
 
-  return session;
+  const retry = useCallback(() => {
+    setSession(undefined);
+    load().then(setSession);
+  }, []);
+
+  return { session, retry };
 }

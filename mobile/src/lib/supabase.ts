@@ -32,6 +32,16 @@ export const chunkedSecureStore = {
   },
 };
 
+// Without a limit, a request to an unreachable server can hang for a very long time.
+const REQUEST_TIMEOUT_MS = 15000;
+
+const fetchWithTimeout: typeof fetch = (input, init) => {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  init?.signal?.addEventListener('abort', () => controller.abort());
+  return fetch(input, { ...init, signal: controller.signal }).finally(() => clearTimeout(timer));
+};
+
 export const supabase = createClient<Database>(
   process.env.EXPO_PUBLIC_SUPABASE_URL!,
   process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
@@ -42,6 +52,7 @@ export const supabase = createClient<Database>(
       persistSession: true,
       detectSessionInUrl: false,
     },
+    global: { fetch: fetchWithTimeout },
   },
 );
 

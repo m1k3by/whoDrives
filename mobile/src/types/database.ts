@@ -74,6 +74,37 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"invites": {
+                  Row: {
+                    "created_at": string,"created_by": string | null,"expires_at": string,"family_id": string,"id": string,"role": Database["public"]['Enums']["family_role"],"token_hash": string,"used_at": string | null,"used_by": string | null
+                  }
+                  Insert: {
+                    "created_at"?: string,"created_by"?: string | null,"expires_at"?: string,"family_id": string,"id"?: string,"role": Database["public"]['Enums']["family_role"],"token_hash": string,"used_at"?: string | null,"used_by"?: string | null
+                  }
+                  Update: {
+                    "created_at"?: string,"created_by"?: string | null,"expires_at"?: string,"family_id"?: string,"id"?: string,"role"?: Database["public"]['Enums']["family_role"],"token_hash"?: string,"used_at"?: string | null,"used_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "invites_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "invites_family_id_fkey"
+      columns: ["family_id"]
+isOneToOne: false
+      referencedRelation: "families"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "invites_used_by_fkey"
+      columns: ["used_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"profiles": {
                   Row: {
                     "created_at": string,"display_name": string,"id": string,"updated_at": string
@@ -93,11 +124,22 @@ isOneToOne: false
             [_ in never]: never
           }
           Functions: {
-            "is_family_member":
+            "create_invite":
+{ Args: { "p_family_id": string,"p_role": Database["public"]['Enums']["family_role"] }; Returns: {
+              "code": string,"expires_at": string
+            }[]
+                           },
+"invite_code_hash":
+{ Args: { "p_code": string }; Returns: string
+                           },
+"is_family_member":
 { Args: { "p_family_id": string }; Returns: boolean
                            },
 "is_family_parent":
 { Args: { "p_family_id": string }; Returns: boolean
+                           },
+"redeem_invite":
+{ Args: { "p_code": string,"p_user_id": string }; Returns: string
                            }
           }
           Enums: {
