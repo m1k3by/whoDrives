@@ -1,14 +1,14 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text } from 'react-native';
 
-import { useCreateFamily, useMyFamily, useRemoveMember } from '@/features/family/hooks';
-import {
-  InvalidInviteError,
-  useOpenInvites,
-  useRedeemInvite,
-  useRevokeInvite,
-} from '@/features/invites/hooks';
+import { useCreateFamily, useMyFamily } from '@/features/family/hooks';
+import { InvalidInviteError, useRedeemInvite } from '@/features/invites/hooks';
+import { dayLabel } from '@/features/occurrences/days';
+import { useOccurrences } from '@/features/occurrences/hooks';
+import { MonthCalendar } from '@/features/occurrences/MonthCalendar';
+import { addMonths, dayKey, startOfToday } from '@/features/occurrences/month';
+import { OccurrenceItem } from '@/features/occurrences/OccurrenceItem';
 import { NameForm } from '@/features/profile/NameForm';
 import { useMyProfile } from '@/features/profile/hooks';
 import { Body, Button, colors, Field, Loading, Screen, Title } from '@/ui/components';
@@ -17,6 +17,7 @@ import { t } from '@/ui/strings';
 export default function HomeScreen() {
   const profile = useMyProfile();
   const family = useMyFamily();
+  const [selected, setSelected] = useState(startOfToday);
 
   if (profile.isPending || family.isPending) return <Loading />;
   if (profile.isError || family.isError) {
@@ -45,106 +46,56 @@ export default function HomeScreen() {
   }
   if (!family.data) return <CreateFamily />;
 
-  const myId = profile.data.id;
   const isParent = family.data.family_members.some(
-    (m) => m.user_id === myId && m.role === 'parent',
+    (m) => m.user_id === profile.data.id && m.role === 'parent',
   );
-  const { id: familyId, name: familyName } = family.data;
 
   return (
     <Screen>
       <Title>{family.data.name}</Title>
-      <Button label={t.events.title} onPress={() => router.push('/events')} />
+      <MonthCalendar familyId={family.data.id} selected={selected} onSelect={setSelected} />
+      <Text style={styles.heading}>{dayLabel(selected, new Date())}</Text>
+      <DayList familyId={family.data.id} day={selected} isParent={isParent} />
+      <Button label={t.calendar.upcoming} onPress={() => router.push('/upcoming')} />
+      <Button label={t.events.title} variant="secondary" onPress={() => router.push('/events')} />
       <Button
         label={t.children.title}
         variant="secondary"
         onPress={() => router.push('/children')}
       />
-      {isParent && (
-        <Button
-          label={t.invite.title}
-          variant="secondary"
-          onPress={() => router.push({ pathname: '/invite', params: { familyId, familyName } })}
-        />
-      )}
+      <Button
+        label={t.familyScreen.title}
+        variant="secondary"
+        onPress={() => router.push('/family')}
+      />
       <ProfileButton />
-      <Text style={styles.heading}>{t.family.members}</Text>
-      {family.data.family_members.map((m) => (
-        <View key={m.user_id} style={styles.member}>
-          <Text style={styles.memberName}>
-            {m.profiles?.display_name || t.family.unnamedMember}
-            {m.user_id === myId ? ` ${t.family.you}` : ''}
-          </Text>
-          <Text style={styles.memberRole}>{t.family.roles[m.role]}</Text>
-          {isParent && m.user_id !== myId && (
-            <RemoveMemberButton
-              familyId={familyId}
-              userId={m.user_id}
-              name={m.profiles?.display_name || t.family.unnamedMember}
-            />
-          )}
-        </View>
-      ))}
-      {isParent && <OpenInvites familyId={familyId} />}
     </Screen>
   );
 }
 
-function RemoveMemberButton({
-  familyId,
-  userId,
-  name,
-}: {
-  familyId: string;
-  userId: string;
-  name: string;
-}) {
-  const remove = useRemoveMember();
+/** Occurrences of one day; uses the (cached) query of the calendar month. */
+function DayList({ familyId, day, isParent }: { familyId: string; day: Date; isParent: boolean }) {
+  const month = addMonths(day, 0);
+  const occurrences = useOccurrences(familyId, month, addMonths(month, 1));
+
+  if (occurrences.isPending) return <Loading />;
+  if (occurrences.isError) {
+    return (
+      <>
+        <Body error>{t.common.genericError}</Body>
+        <Button label={t.common.retry} onPress={() => occurrences.refetch()} />
+      </>
+    );
+  }
+  const items = occurrences.data.filter((o) => dayKey(new Date(o.starts_at)) === dayKey(day));
+  if (items.length === 0) return <Body>{t.calendar.noneOnDay}</Body>;
+
+  const label = dayLabel(day, new Date());
   return (
     <>
-      <Button
-        label={t.family.remove}
-        variant="secondary"
-        loading={remove.isPending}
-        onPress={() =>
-          Alert.alert(t.family.removeTitle(name), t.family.removeText, [
-            { text: t.common.cancel, style: 'cancel' },
-            {
-              text: t.family.remove,
-              style: 'destructive',
-              onPress: () => remove.mutate({ familyId, userId }),
-            },
-          ])
-        }
-      />
-      {remove.isError && <Body error>{t.common.genericError}</Body>}
-    </>
-  );
-}
-
-function OpenInvites({ familyId }: { familyId: string }) {
-  const invites = useOpenInvites(familyId);
-  const revoke = useRevokeInvite();
-  if (!invites.data?.length) return null;
-
-  return (
-    <>
-      <Text style={styles.heading}>{t.invite.openTitle}</Text>
-      {invites.data.map((i) => (
-        <View key={i.id} style={styles.member}>
-          <Text style={styles.memberName}>{t.family.roles[i.role]}</Text>
-          <Text style={styles.memberRole}>
-            {t.invite.validUntil(new Date(i.expires_at).toLocaleDateString('de-DE'))}
-          </Text>
-          <Button
-            label={t.invite.revoke}
-            variant="secondary"
-            loading={revoke.isPending && revoke.variables === i.id}
-            onPress={() => revoke.mutate(i.id)}
-          />
-        </View>
+      {items.map((o) => (
+        <OccurrenceItem key={o.id} occurrence={o} dayLabel={label} isParent={isParent} />
       ))}
-      {revoke.isError && <Body error>{t.common.genericError}</Body>}
     </>
   );
 }
@@ -211,12 +162,4 @@ function ProfileButton() {
 
 const styles = StyleSheet.create({
   heading: { fontSize: 24, fontWeight: '700', color: colors.text },
-  member: {
-    gap: 8,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  memberName: { fontSize: 22, color: colors.text },
-  memberRole: { fontSize: 18, color: colors.muted },
 });

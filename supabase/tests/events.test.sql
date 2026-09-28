@@ -109,7 +109,9 @@ select throws_ok(
 
 delete from public.events;
 reset role;
-select is((select count(*)::int from public.events), 2, 'parent of family B cannot delete events of family A');
+select is(
+  (select count(*)::int from public.events where family_id = 'a3000000-0000-0000-0000-000000000000'),
+  2, 'parent of family B cannot delete events of family A');
 
 select * from finish();
 rollback;

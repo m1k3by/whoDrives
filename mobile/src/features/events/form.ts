@@ -8,17 +8,7 @@ type EventRow = Database['public']['Tables']['events']['Row'];
 // Index = Date.getUTCDay() (0 = Sunday)
 const RRULE_DAYS = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'] as const;
 
-/** "6.10.2026" -> "2026-10-06"; null if not a real date */
-export function parseGermanDate(input: string): string | null {
-  const m = /^(\d{1,2})\.(\d{1,2})\.(\d{4})$/.exec(input.trim());
-  if (!m) return null;
-  const [day, month, year] = [Number(m[1]), Number(m[2]), Number(m[3])];
-  const d = new Date(Date.UTC(year, month - 1, day));
-  if (d.getUTCFullYear() !== year || d.getUTCMonth() !== month - 1 || d.getUTCDate() !== day) {
-    return null;
-  }
-  return d.toISOString().slice(0, 10);
-}
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 /** "9:30" or "9.30" -> "09:30"; null if invalid */
 export function parseTime(input: string): string | null {
@@ -37,6 +27,7 @@ export type EventForm = {
   childId: string | null;
   location: string;
   weekly: boolean;
+  /** "YYYY-MM-DD" from the date picker, '' = not chosen */
   firstDate: string;
   untilDate: string;
   time: string;
@@ -51,20 +42,16 @@ export function toEventInsert(
 ): { ok: true; value: EventInsert } | { ok: false; error: FormError } {
   if (!form.title.trim()) return { ok: false, error: 'title' };
   if (!form.childId) return { ok: false, error: 'child' };
-  const firstDate = parseGermanDate(form.firstDate);
-  if (!firstDate) return { ok: false, error: 'date' };
+  const firstDate = form.firstDate;
+  if (!ISO_DATE.test(firstDate)) return { ok: false, error: 'date' };
   const time = parseTime(form.time);
   if (!time) return { ok: false, error: 'time' };
   const duration = Number(form.durationMin);
   if (!Number.isInteger(duration) || duration < 5 || duration > 1440) {
     return { ok: false, error: 'duration' };
   }
-  let untilDate: string | null = null;
-  if (form.weekly && form.untilDate.trim()) {
-    untilDate = parseGermanDate(form.untilDate);
-    if (!untilDate) return { ok: false, error: 'untilDate' };
-    if (untilDate < firstDate) return { ok: false, error: 'untilBeforeFirst' };
-  }
+  const untilDate = form.weekly && ISO_DATE.test(form.untilDate) ? form.untilDate : null;
+  if (untilDate && untilDate < firstDate) return { ok: false, error: 'untilBeforeFirst' };
   return {
     ok: true,
     value: {

@@ -155,6 +155,37 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"occurrences": {
+                  Row: {
+                    "assigned_to": string | null,"created_at": string,"ends_at": string,"event_id": string,"family_id": string,"id": string,"note": string | null,"starts_at": string,"status": Database["public"]['Enums']["occurrence_status"],"updated_at": string
+                  }
+                  Insert: {
+                    "assigned_to"?: string | null,"created_at"?: string,"ends_at": string,"event_id": string,"family_id": string,"id"?: string,"note"?: string | null,"starts_at": string,"status"?: Database["public"]['Enums']["occurrence_status"],"updated_at"?: string
+                  }
+                  Update: {
+                    "assigned_to"?: string | null,"created_at"?: string,"ends_at"?: string,"event_id"?: string,"family_id"?: string,"id"?: string,"note"?: string | null,"starts_at"?: string,"status"?: Database["public"]['Enums']["occurrence_status"],"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "occurrences_assigned_to_fkey"
+      columns: ["assigned_to"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "occurrences_event_id_fkey"
+      columns: ["event_id"]
+isOneToOne: false
+      referencedRelation: "events"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "occurrences_family_id_fkey"
+      columns: ["family_id"]
+isOneToOne: false
+      referencedRelation: "families"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"profiles": {
                   Row: {
                     "created_at": string,"display_name": string,"id": string,"updated_at": string
@@ -174,10 +205,19 @@ isOneToOne: false
             [_ in never]: never
           }
           Functions: {
-            "create_invite":
+            "cancel_occurrence":
+{ Args: { "p_occurrence_id": string }; Returns: undefined
+                           },
+"create_invite":
 { Args: { "p_family_id": string,"p_role": Database["public"]['Enums']["family_role"] }; Returns: {
               "code": string,"expires_at": string
             }[]
+                           },
+"generate_occurrences":
+{ Args: Record<PropertyKey, never>; Returns: undefined
+                           },
+"generate_occurrences_for":
+{ Args: { "p_event_id": string,"p_from": string,"p_to": string }; Returns: undefined
                            },
 "invite_code_hash":
 { Args: { "p_code": string }; Returns: string
@@ -193,7 +233,7 @@ isOneToOne: false
                            }
           }
           Enums: {
-            "event_kind": "ride"|"pickup"|"care"|"other","family_role": "parent"|"grandparent"|"other"
+            "event_kind": "ride"|"pickup"|"care"|"other","family_role": "parent"|"grandparent"|"other","occurrence_status": "open"|"claimed"|"cancelled"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -313,7 +353,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "event_kind": ["ride", "pickup", "care", "other"],"family_role": ["parent", "grandparent", "other"]
+            "event_kind": ["ride", "pickup", "care", "other"],"family_role": ["parent", "grandparent", "other"],"occurrence_status": ["open", "claimed", "cancelled"]
           }
         }
 } as const

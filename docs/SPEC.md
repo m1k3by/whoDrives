@@ -97,7 +97,7 @@ Zentral ist die Trennung von `events` (die Regel, z. B. „Reiten jeden Dienstag
 - `is_family_member(family_id)`: security definer, stable. Wird von allen RLS-Policies genutzt.
 - `claim_occurrence(occurrence_id)`: setzt `assigned_to = auth.uid()` nur, wenn der Termin noch offen ist. Damit können nicht zwei Personen gleichzeitig zusagen.
 - `release_occurrence(occurrence_id)`: gibt einen übernommenen Termin wieder frei, nur durch die zugewiesene Person oder Eltern.
-- `generate_occurrences()`: läuft täglich per pg_cron und hält für alle Regeln die nächsten 8 Wochen vorberechnet.
+- `generate_occurrences()`: läuft täglich per pg_cron und hält für alle Regeln die nächsten 12 Monate vorberechnet (ursprünglich 8 Wochen; erweitert für den Monatskalender, 28.09.2026).
 
 ```sql
 update occurrences
@@ -260,7 +260,7 @@ Step 0 ist fertig, wenn die App über Internal Testing auf einem Android-Handy l
 - Migrationen nur vorwärts und abwärtskompatibel; nie eine bestehende Migration ändern.
 - Keine Secrets, kein service_role Key im App-Code.
 - Vor jedem Commit: Lint, Typecheck, Tests lokal grün.
-- UI für ältere Nutzer: große Schrift, große Buttons, Listen statt Kalender-Raster, klare deutsche Texte.
+- UI für ältere Nutzer: große Schrift, große Buttons, klare deutsche Texte. Monatskalender nur mit großer Tagesliste darunter, keine Stunden-Zeitleiste (Entscheidung 28.09.2026).
 
 ## Feature-Roadmap
 
@@ -271,7 +271,7 @@ Nach Step 0 folgt ein Feature pro Step, jeweils als eigener PR und eigenes Relea
 | 1 Profil | Anzeigename setzen und ändern, Logout | Name erscheint in der Mitgliederliste |
 | 2 Einladung | invites, Function redeem-invite, Rollen wählen, Code teilen | Oma tritt per Code bei und sieht die Familie; abgelaufener Code wird abgelehnt |
 | 3 Kinder und Regeln | children, events; Termine einmalig oder wöchentlich anlegen | Eltern legen „Reiten, jeden Di 15 Uhr“ an; Großeltern können das nicht |
-| 4 Termine | occurrences, pg_cron-Job, Liste „nächste 14 Tage“, einzelnen Termin absagen | 8 Wochen vorberechnet; Termine stimmen über die Zeitumstellung hinweg |
+| 4 Termine | occurrences, pg_cron-Job, Monatskalender mit Tagesliste, Liste „nächste 14 Tage“, einzelnen Termin absagen | 12 Monate vorberechnet; Termine stimmen über die Zeitumstellung hinweg |
 | 5 Übernehmen | claim_occurrence, release_occurrence, Status mit Namen, Realtime | Zwei Handys tippen gleichzeitig: nur eins bekommt den Termin, das andere aktualisiert live |
 | 6 Push | push_tokens, Function notify, FCM über Expo | Push bei neuem offenem Termin, bei Übernahme und am Vorabend für offene Termine |
 | 7 Übersicht | Filter: meine Termine, offene Termine, alle | Jeder sieht auf einen Blick, wer diese Woche was macht |

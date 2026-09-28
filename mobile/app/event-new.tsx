@@ -2,8 +2,8 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { DateField } from '@/features/events/DateField';
 import {
-  parseGermanDate,
   toEventInsert,
   type EventForm,
   type EventKind,
@@ -11,6 +11,7 @@ import {
 } from '@/features/events/form';
 import { useChildren, useCreateEvent } from '@/features/events/hooks';
 import { useMyMembership } from '@/features/family/hooks';
+import { fromDayKey } from '@/features/occurrences/month';
 import { Body, Button, colors, Field, Screen } from '@/ui/components';
 import { t } from '@/ui/strings';
 
@@ -34,8 +35,7 @@ export default function NewEventScreen() {
   });
   const set = (patch: Partial<EventForm>) => setForm((f) => ({ ...f, ...patch }));
 
-  const firstDate = parseGermanDate(form.firstDate);
-  const weekday = firstDate && t.events.weekdays[new Date(`${firstDate}T00:00:00Z`).getUTCDay()];
+  const weekday = form.firstDate && t.events.weekdays[fromDayKey(form.firstDate).getDay()];
 
   function save() {
     if (!family) return;
@@ -105,22 +105,18 @@ export default function NewEventScreen() {
         </View>
       </View>
 
-      <Field
+      <DateField
         label={form.weekly ? t.events.firstDateWeeklyLabel : t.events.firstDateLabel}
-        placeholder="06.10.2026"
         value={form.firstDate}
-        onChangeText={(firstDate) => set({ firstDate })}
-        keyboardType="numbers-and-punctuation"
-        maxLength={10}
+        onChange={(firstDate) => set({ firstDate })}
       />
       {form.weekly && weekday && <Body>{t.events.weekdayHint(weekday)}</Body>}
       {form.weekly && (
-        <Field
+        <DateField
           label={t.events.untilDateLabel}
           value={form.untilDate}
-          onChangeText={(untilDate) => set({ untilDate })}
-          keyboardType="numbers-and-punctuation"
-          maxLength={10}
+          onChange={(untilDate) => set({ untilDate })}
+          clearLabel={t.events.noEndDate}
         />
       )}
       <Field
