@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import { unregisterPush } from '@/features/push/register';
 import { supabase } from '@/lib/supabase';
 
 const profileKey = ['my-profile'] as const;
@@ -39,6 +40,7 @@ export function useUpdateDisplayName() {
 export function useLogout() {
   const queryClient = useQueryClient();
   return async () => {
+    await unregisterPush().catch(() => {}); // offline: logout must still work
     await supabase.auth.signOut();
     // Never show the previous user's cached data to the next one.
     queryClient.clear();

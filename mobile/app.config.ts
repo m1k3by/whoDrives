@@ -2,6 +2,10 @@ import type { ExpoConfig } from 'expo/config';
 
 const EAS_PROJECT_ID = '119b980e-5f5b-468f-9d78-baa8e0a962e5';
 
+// Firebase config for push (FCM): EAS file variable GOOGLE_SERVICES_JSON
+// (environments development and production). Without it the app builds, but gets no pushes.
+const googleServicesFile = process.env.GOOGLE_SERVICES_JSON;
+
 const config: ExpoConfig = {
   name: 'Who Drives?',
   slug: 'm1k3by', // must match the EAS project created during Expo onboarding
@@ -22,9 +26,10 @@ const config: ExpoConfig = {
       monochromeImage: './assets/android-icon-monochrome.png',
     },
     predictiveBackGestureEnabled: false,
+    googleServicesFile,
   },
   ios: { supportsTablet: true },
-  plugins: ['expo-router', 'expo-secure-store'],
+  plugins: ['expo-router', 'expo-secure-store', 'expo-notifications'],
   experiments: { typedRoutes: true },
   extra: { eas: { projectId: EAS_PROJECT_ID } },
 };

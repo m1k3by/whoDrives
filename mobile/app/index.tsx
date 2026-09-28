@@ -11,6 +11,7 @@ import { addMonths, dayKey, startOfToday } from '@/features/occurrences/month';
 import { OccurrenceItem } from '@/features/occurrences/OccurrenceItem';
 import { NameForm } from '@/features/profile/NameForm';
 import { useMyProfile } from '@/features/profile/hooks';
+import { usePushRegistration } from '@/features/push/register';
 import { Body, Button, colors, Field, Loading, Screen, Title } from '@/ui/components';
 import { t } from '@/ui/strings';
 
@@ -20,6 +21,7 @@ export default function HomeScreen() {
   const [selected, setSelected] = useState(startOfToday);
   // One live subscription for all occurrence lists while the family is shown
   useLiveOccurrences(family.data?.id);
+  usePushRegistration(!!family.data);
 
   if (profile.isPending || family.isPending) return <Loading />;
   if (profile.isError || family.isError) {

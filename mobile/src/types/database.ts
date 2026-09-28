@@ -155,6 +155,25 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"notification_outbox": {
+                  Row: {
+                    "body": string,"created_at": string,"dedupe_key": string | null,"id": number,"sent_at": string | null,"title": string,"user_id": string
+                  }
+                  Insert: {
+                    "body": string,"created_at"?: string,"dedupe_key"?: string | null,"id"?: never,"sent_at"?: string | null,"title": string,"user_id": string
+                  }
+                  Update: {
+                    "body"?: string,"created_at"?: string,"dedupe_key"?: string | null,"id"?: never,"sent_at"?: string | null,"title"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "notification_outbox_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"occurrences": {
                   Row: {
                     "assigned_to": string | null,"created_at": string,"ends_at": string,"event_id": string,"family_id": string,"id": string,"note": string | null,"starts_at": string,"status": Database["public"]['Enums']["occurrence_status"],"updated_at": string
@@ -199,6 +218,25 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
+                },"push_tokens": {
+                  Row: {
+                    "platform": string,"token": string,"updated_at": string,"user_id": string
+                  }
+                  Insert: {
+                    "platform": string,"token": string,"updated_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "platform"?: string,"token"?: string,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "push_tokens_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 }
           }
           Views: {
@@ -215,6 +253,21 @@ isOneToOne: false
 { Args: { "p_family_id": string,"p_role": Database["public"]['Enums']["family_role"] }; Returns: {
               "code": string,"expires_at": string
             }[]
+                           },
+"deliver_notifications":
+{ Args: Record<PropertyKey, never>; Returns: undefined
+                           },
+"describe_occurrence":
+{ Args: { "p_occurrence_id": string }; Returns: string
+                           },
+"enqueue_notification":
+{ Args: { "p_body": string,"p_dedupe_prefix"?: string,"p_title": string,"p_user_ids": (string)[] }; Returns: undefined
+                           },
+"enqueue_scheduled_notifications":
+{ Args: { "p_now"?: string }; Returns: undefined
+                           },
+"family_member_ids":
+{ Args: { "p_except": string,"p_family_id": string,"p_parents_only": boolean }; Returns: (string)[]
                            },
 "generate_occurrences":
 { Args: Record<PropertyKey, never>; Returns: undefined
@@ -233,6 +286,9 @@ isOneToOne: false
                            },
 "redeem_invite":
 { Args: { "p_code": string,"p_user_id": string }; Returns: string
+                           },
+"register_push_token":
+{ Args: { "p_platform": string,"p_token": string }; Returns: undefined
                            },
 "release_occurrence":
 { Args: { "p_occurrence_id": string }; Returns: boolean
