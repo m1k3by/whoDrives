@@ -51,14 +51,21 @@ function Gate() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Protected guard={!!session}>
         <Stack.Screen name="index" />
-        <Stack.Screen
-          name="profile"
-          options={{ headerShown: true, title: t.profile.title, headerShadowVisible: false }}
-        />
-        <Stack.Screen
-          name="invite"
-          options={{ headerShown: true, title: t.invite.title, headerShadowVisible: false }}
-        />
+        {(
+          [
+            ['profile', t.profile.title],
+            ['invite', t.invite.title],
+            ['events', t.events.title],
+            ['event-new', t.events.new],
+            ['children', t.children.title],
+          ] as const
+        ).map(([name, title]) => (
+          <Stack.Screen
+            key={name}
+            name={name}
+            options={{ headerShown: true, title, headerShadowVisible: false }}
+          />
+        ))}
       </Stack.Protected>
       <Stack.Protected guard={!session}>
         <Stack.Screen name="login" />

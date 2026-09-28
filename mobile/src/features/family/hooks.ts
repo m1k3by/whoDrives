@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import { useMyProfile } from '@/features/profile/hooks';
 import { supabase } from '@/lib/supabase';
 
 const familyKey = ['my-family'] as const;
@@ -18,6 +19,31 @@ export function useMyFamily() {
       if (error) throw error;
       return data;
     },
+  });
+}
+
+/** My family plus whether I am a parent in it (both queries are cached). */
+export function useMyMembership() {
+  const profile = useMyProfile();
+  const family = useMyFamily();
+  const me = family.data?.family_members.find((m) => m.user_id === profile.data?.id);
+  return { family: family.data, myId: profile.data?.id, isParent: me?.role === 'parent' };
+}
+
+export function useRemoveMember() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ familyId, userId }: { familyId: string; userId: string }) => {
+      const { error, count } = await supabase
+        .from('family_members')
+        .delete({ count: 'exact' })
+        .eq('family_id', familyId)
+        .eq('user_id', userId);
+      if (error) throw error;
+      // RLS silently deletes nothing when not allowed
+      if (count === 0) throw new Error('not allowed');
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: familyKey }),
   });
 }
 

@@ -36,6 +36,56 @@ export type Database = {
                   Relationships: [
                     
                   ]
+                },"children": {
+                  Row: {
+                    "color": string,"created_at": string,"family_id": string,"first_name": string,"id": string
+                  }
+                  Insert: {
+                    "color": string,"created_at"?: string,"family_id": string,"first_name": string,"id"?: string
+                  }
+                  Update: {
+                    "color"?: string,"created_at"?: string,"family_id"?: string,"first_name"?: string,"id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "children_family_id_fkey"
+      columns: ["family_id"]
+isOneToOne: false
+      referencedRelation: "families"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"events": {
+                  Row: {
+                    "child_id": string,"created_at": string,"created_by": string | null,"duration_min": number,"family_id": string,"first_date": string,"id": string,"kind": Database["public"]['Enums']["event_kind"],"location": string | null,"rrule": string | null,"start_time": string,"timezone": string,"title": string,"until_date": string | null
+                  }
+                  Insert: {
+                    "child_id": string,"created_at"?: string,"created_by"?: string | null,"duration_min"?: number,"family_id": string,"first_date": string,"id"?: string,"kind"?: Database["public"]['Enums']["event_kind"],"location"?: string | null,"rrule"?: string | null,"start_time": string,"timezone"?: string,"title": string,"until_date"?: string | null
+                  }
+                  Update: {
+                    "child_id"?: string,"created_at"?: string,"created_by"?: string | null,"duration_min"?: number,"family_id"?: string,"first_date"?: string,"id"?: string,"kind"?: Database["public"]['Enums']["event_kind"],"location"?: string | null,"rrule"?: string | null,"start_time"?: string,"timezone"?: string,"title"?: string,"until_date"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "events_child_id_family_id_fkey"
+      columns: ["child_id","family_id"]
+isOneToOne: false
+      referencedRelation: "children"
+      referencedColumns: ["id","family_id"]
+    },{
+      foreignKeyName: "events_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "events_family_id_fkey"
+      columns: ["family_id"]
+isOneToOne: false
+      referencedRelation: "families"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"families": {
                   Row: {
                     "created_at": string,"created_by": string | null,"id": string,"name": string
@@ -143,7 +193,7 @@ isOneToOne: false
                            }
           }
           Enums: {
-            "family_role": "parent"|"grandparent"|"other"
+            "event_kind": "ride"|"pickup"|"care"|"other","family_role": "parent"|"grandparent"|"other"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -263,7 +313,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "family_role": ["parent", "grandparent", "other"]
+            "event_kind": ["ride", "pickup", "care", "other"],"family_role": ["parent", "grandparent", "other"]
           }
         }
 } as const
