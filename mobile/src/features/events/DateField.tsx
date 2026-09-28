@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { addMonths, dayKey, fromDayKey, startOfToday } from '@/features/occurrences/month';
 import { MonthGrid, MonthHeader } from '@/features/occurrences/MonthGrid';
-import { Button, colors } from '@/ui/components';
+import { Button } from '@/ui/components';
 import { t } from '@/ui/strings';
+
+import { PickerField } from './PickerField';
 
 /** "Dienstag, 06.10.2026" */
 export const longDate = (d: Date) =>
@@ -29,72 +30,38 @@ export function DateField({
   const [open, setOpen] = useState(false);
   const [month, setMonth] = useState(() => addMonths(value ? fromDayKey(value) : new Date(), 0));
   const selected = value ? fromDayKey(value) : null;
-  const text = selected ? longDate(selected) : t.dateField.choose;
-
-  function show() {
-    setMonth(addMonths(selected ?? new Date(), 0));
-    setOpen(true);
-  }
 
   return (
-    <View style={styles.field}>
-      <Text style={styles.label}>{label}</Text>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={`${label}: ${text}`}
-        onPress={show}
-        style={styles.input}
-      >
-        <Text style={[styles.value, !selected && styles.placeholder]}>{text}</Text>
-      </Pressable>
-      {clearLabel && selected && (
-        <Button label={clearLabel} variant="secondary" onPress={() => onChange('')} />
-      )}
-
-      <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
-        <View style={styles.backdrop}>
-          <View style={styles.sheet}>
-            <Text style={styles.label}>{label}</Text>
-            <MonthHeader
-              month={month}
-              onPrevious={() => setMonth(addMonths(month, -1))}
-              onNext={() => setMonth(addMonths(month, 1))}
-            />
-            <MonthGrid
-              month={month}
-              today={startOfToday()}
-              selected={selected}
-              onSelect={(day) => {
-                onChange(dayKey(day));
-                setOpen(false);
-              }}
-            />
-            <Button label={t.common.cancel} variant="secondary" onPress={() => setOpen(false)} />
-          </View>
-        </View>
-      </Modal>
-    </View>
+    <PickerField
+      label={label}
+      text={selected && longDate(selected)}
+      placeholder={t.dateField.choose}
+      open={open}
+      onOpen={() => {
+        setMonth(addMonths(selected ?? new Date(), 0));
+        setOpen(true);
+      }}
+      onClose={() => setOpen(false)}
+      footer={
+        clearLabel &&
+        selected && <Button label={clearLabel} variant="secondary" onPress={() => onChange('')} />
+      }
+    >
+      <MonthHeader
+        month={month}
+        onPrevious={() => setMonth(addMonths(month, -1))}
+        onNext={() => setMonth(addMonths(month, 1))}
+      />
+      <MonthGrid
+        month={month}
+        today={startOfToday()}
+        selected={selected}
+        onSelect={(day) => {
+          onChange(dayKey(day));
+          setOpen(false);
+        }}
+      />
+      <Button label={t.common.cancel} variant="secondary" onPress={() => setOpen(false)} />
+    </PickerField>
   );
 }
-
-const styles = StyleSheet.create({
-  field: { gap: 8 },
-  label: { fontSize: 20, fontWeight: '600', color: colors.text },
-  input: {
-    minHeight: 60,
-    borderWidth: 2,
-    borderColor: colors.border,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    justifyContent: 'center',
-  },
-  value: { fontSize: 22, color: colors.text },
-  placeholder: { color: colors.muted },
-  backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    padding: 12,
-  },
-  sheet: { backgroundColor: colors.background, borderRadius: 16, padding: 16, gap: 12 },
-});

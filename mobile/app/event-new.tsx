@@ -10,12 +10,16 @@ import {
   type FormError,
 } from '@/features/events/form';
 import { useChildren, useCreateEvent } from '@/features/events/hooks';
+import { TimeField } from '@/features/events/TimeField';
 import { useMyMembership } from '@/features/family/hooks';
 import { fromDayKey } from '@/features/occurrences/month';
-import { Body, Button, colors, Field, Screen } from '@/ui/components';
+import { Body, Button, Chip, ChipGrid, colors, Field, Screen } from '@/ui/components';
 import { t } from '@/ui/strings';
 
 const KINDS = Object.keys(t.events.kinds) as EventKind[];
+const DURATIONS = Object.keys(t.events.durations).map(
+  Number,
+) as (keyof typeof t.events.durations)[];
 
 export default function NewEventScreen() {
   const { family } = useMyMembership();
@@ -119,21 +123,19 @@ export default function NewEventScreen() {
           clearLabel={t.events.noEndDate}
         />
       )}
-      <Field
-        label={t.events.timeLabel}
-        placeholder="15:00"
-        value={form.time}
-        onChangeText={(time) => set({ time })}
-        keyboardType="numbers-and-punctuation"
-        maxLength={5}
-      />
-      <Field
-        label={t.events.durationLabel}
-        value={form.durationMin}
-        onChangeText={(durationMin) => set({ durationMin })}
-        keyboardType="number-pad"
-        maxLength={4}
-      />
+      <TimeField label={t.events.timeLabel} value={form.time} onChange={(time) => set({ time })} />
+      <Text style={styles.label}>{t.events.durationLabel}</Text>
+      <ChipGrid>
+        {DURATIONS.map((minutes) => (
+          <Chip
+            key={minutes}
+            label={t.events.durations[minutes]}
+            basis="30%"
+            selected={form.durationMin === String(minutes)}
+            onPress={() => set({ durationMin: String(minutes) })}
+          />
+        ))}
+      </ChipGrid>
 
       {error && <Body error>{t.events.errors[error]}</Body>}
       {create.isError && <Body error>{t.common.genericError}</Body>}

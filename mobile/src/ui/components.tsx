@@ -77,6 +77,37 @@ export function Button({
   );
 }
 
+/** Selectable option in a wrapping grid; `basis` sets how many fit per row (e.g. '30%' = 3). */
+export function Chip({
+  label,
+  a11y,
+  selected,
+  onPress,
+  basis = '15%',
+}: {
+  label: string;
+  a11y?: string;
+  selected: boolean;
+  onPress: () => void;
+  basis?: `${number}%`;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={a11y ?? label}
+      accessibilityState={{ selected }}
+      onPress={onPress}
+      style={[styles.chip, { flexBasis: basis }, selected && styles.chipSelected]}
+    >
+      <Text style={[styles.chipLabel, selected && styles.chipLabelSelected]}>{label}</Text>
+    </Pressable>
+  );
+}
+
+export function ChipGrid({ children }: { children: ReactNode }) {
+  return <View style={styles.chipGrid}>{children}</View>;
+}
+
 export function Field({ label, ...props }: TextInputProps & { label: string }) {
   return (
     <View style={styles.field}>
@@ -124,4 +155,17 @@ const styles = StyleSheet.create({
   buttonLabel: { fontSize: 22, fontWeight: '700', color: colors.onPrimary },
   buttonLabelSecondary: { color: colors.primary },
   pressed: { opacity: 0.7 },
+  chipGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+  chip: {
+    flexGrow: 1,
+    minHeight: 52,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  chipSelected: { backgroundColor: colors.primary },
+  chipLabel: { fontSize: 20, color: colors.primary, fontWeight: '600' },
+  chipLabelSelected: { color: colors.onPrimary },
 });
