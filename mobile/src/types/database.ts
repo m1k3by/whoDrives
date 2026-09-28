@@ -208,6 +208,9 @@ isOneToOne: false
             "cancel_occurrence":
 { Args: { "p_occurrence_id": string }; Returns: undefined
                            },
+"claim_occurrence":
+{ Args: { "p_occurrence_id": string }; Returns: boolean
+                           },
 "create_invite":
 { Args: { "p_family_id": string,"p_role": Database["public"]['Enums']["family_role"] }; Returns: {
               "code": string,"expires_at": string
@@ -230,6 +233,9 @@ isOneToOne: false
                            },
 "redeem_invite":
 { Args: { "p_code": string,"p_user_id": string }; Returns: string
+                           },
+"release_occurrence":
+{ Args: { "p_occurrence_id": string }; Returns: boolean
                            }
           }
           Enums: {

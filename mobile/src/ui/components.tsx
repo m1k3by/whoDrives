@@ -20,6 +20,7 @@ export const colors = {
   border: '#999',
   error: '#b00020',
   background: '#fff',
+  open: '#a14a00', // "noch offen": needs attention, but not an error
 };
 
 export function Screen({ children }: { children: ReactNode }) {

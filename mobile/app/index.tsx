@@ -5,7 +5,7 @@ import { StyleSheet, Text } from 'react-native';
 import { useCreateFamily, useMyFamily } from '@/features/family/hooks';
 import { InvalidInviteError, useRedeemInvite } from '@/features/invites/hooks';
 import { dayLabel } from '@/features/occurrences/days';
-import { useOccurrences } from '@/features/occurrences/hooks';
+import { useLiveOccurrences, useOccurrences } from '@/features/occurrences/hooks';
 import { MonthCalendar } from '@/features/occurrences/MonthCalendar';
 import { addMonths, dayKey, startOfToday } from '@/features/occurrences/month';
 import { OccurrenceItem } from '@/features/occurrences/OccurrenceItem';
@@ -18,6 +18,8 @@ export default function HomeScreen() {
   const profile = useMyProfile();
   const family = useMyFamily();
   const [selected, setSelected] = useState(startOfToday);
+  // One live subscription for all occurrence lists while the family is shown
+  useLiveOccurrences(family.data?.id);
 
   if (profile.isPending || family.isPending) return <Loading />;
   if (profile.isError || family.isError) {
@@ -55,7 +57,12 @@ export default function HomeScreen() {
       <Title>{family.data.name}</Title>
       <MonthCalendar familyId={family.data.id} selected={selected} onSelect={setSelected} />
       <Text style={styles.heading}>{dayLabel(selected, new Date())}</Text>
-      <DayList familyId={family.data.id} day={selected} isParent={isParent} />
+      <DayList
+        familyId={family.data.id}
+        day={selected}
+        myId={profile.data.id}
+        isParent={isParent}
+      />
       <Button label={t.calendar.upcoming} onPress={() => router.push('/upcoming')} />
       <Button label={t.events.title} variant="secondary" onPress={() => router.push('/events')} />
       <Button
@@ -74,7 +81,17 @@ export default function HomeScreen() {
 }
 
 /** Occurrences of one day; uses the (cached) query of the calendar month. */
-function DayList({ familyId, day, isParent }: { familyId: string; day: Date; isParent: boolean }) {
+function DayList({
+  familyId,
+  day,
+  myId,
+  isParent,
+}: {
+  familyId: string;
+  day: Date;
+  myId: string;
+  isParent: boolean;
+}) {
   const month = addMonths(day, 0);
   const occurrences = useOccurrences(familyId, month, addMonths(month, 1));
 
@@ -94,7 +111,13 @@ function DayList({ familyId, day, isParent }: { familyId: string; day: Date; isP
   return (
     <>
       {items.map((o) => (
-        <OccurrenceItem key={o.id} occurrence={o} dayLabel={label} isParent={isParent} />
+        <OccurrenceItem
+          key={o.id}
+          occurrence={o}
+          dayLabel={label}
+          myId={myId}
+          isParent={isParent}
+        />
       ))}
     </>
   );

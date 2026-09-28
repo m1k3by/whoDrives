@@ -16,7 +16,7 @@ function nextTwoWeeks() {
 }
 
 export default function UpcomingScreen() {
-  const { family, isParent } = useMyMembership();
+  const { family, myId, isParent } = useMyMembership();
   const [[from, to]] = useState(nextTwoWeeks);
   const occurrences = useOccurrences(family?.id, from, to);
 
@@ -37,7 +37,13 @@ export default function UpcomingScreen() {
         <View key={day.label} style={styles.day}>
           <Text style={styles.dayLabel}>{day.label}</Text>
           {day.items.map((o) => (
-            <OccurrenceItem key={o.id} occurrence={o} dayLabel={day.label} isParent={isParent} />
+            <OccurrenceItem
+              key={o.id}
+              occurrence={o}
+              dayLabel={day.label}
+              myId={myId}
+              isParent={isParent}
+            />
           ))}
         </View>
       ))}

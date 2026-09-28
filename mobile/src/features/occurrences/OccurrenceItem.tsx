@@ -1,25 +1,52 @@
-import { Alert, Pressable, StyleSheet, Text } from 'react-native';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { colors } from '@/ui/components';
+import { Button, colors } from '@/ui/components';
 import { t } from '@/ui/strings';
 
 import { timeLabel } from './days';
-import { useCancelOccurrence, type Occurrence } from './hooks';
+import {
+  AlreadyTakenError,
+  useCancelOccurrence,
+  useClaimOccurrence,
+  useReleaseOccurrence,
+  type Occurrence,
+} from './hooks';
 
-/** One occurrence in a list; parents cancel it by tapping. */
+/**
+ * One occurrence in a list: who takes it, "Ich übernehme" / "Freigeben".
+ * Parents cancel it by tapping the entry.
+ */
 export function OccurrenceItem({
   occurrence: o,
   dayLabel,
+  myId,
   isParent,
 }: {
   occurrence: Occurrence;
   dayLabel: string;
+  myId: string | undefined;
   isParent: boolean;
 }) {
   const cancel = useCancelOccurrence();
+  const claim = useClaimOccurrence();
+  const release = useReleaseOccurrence();
+
   const cancelled = o.status === 'cancelled';
+  const claimed = o.status === 'claimed';
+  const mine = claimed && !!myId && o.assigned_to === myId;
+  const over = new Date(o.ends_at) < new Date();
   const title = o.events?.title ?? '';
+  const assignee = o.assigned_to
+    ? o.profiles?.display_name || t.family.unnamedMember
+    : t.occurrences.formerMember;
   const canCancel = isParent && !cancelled;
+
+  function confirmRelease() {
+    Alert.alert(t.occurrences.releaseTitle(assignee), t.occurrences.releaseText, [
+      { text: t.common.cancel, style: 'cancel' },
+      { text: t.occurrences.release, style: 'destructive', onPress: () => release.mutate(o.id) },
+    ]);
+  }
 
   return (
     <Pressable
@@ -48,16 +75,64 @@ export function OccurrenceItem({
           : `${t.events.kinds[o.events?.kind ?? 'other']} · ${t.occurrences.until(timeLabel(new Date(o.ends_at)))}` +
             (o.events?.location ? ` · ${o.events.location}` : '')}
       </Text>
-      {cancel.isError && <Text style={styles.error}>{t.common.genericError}</Text>}
+
+      {!cancelled && (
+        <Text style={[styles.status, !claimed && styles.open, mine && styles.mine]}>
+          {!claimed
+            ? t.occurrences.open
+            : mine
+              ? t.occurrences.mine
+              : t.occurrences.byOther(assignee)}
+        </Text>
+      )}
+
+      {!cancelled && !over && (
+        <View style={styles.actions}>
+          {!claimed && (
+            <Button
+              label={t.occurrences.claim}
+              loading={claim.isPending}
+              onPress={() => claim.mutate(o.id)}
+            />
+          )}
+          {mine && (
+            <Button
+              label={t.occurrences.releaseMine}
+              variant="secondary"
+              loading={release.isPending}
+              onPress={() => release.mutate(o.id)}
+            />
+          )}
+          {claimed && !mine && isParent && (
+            <Button
+              label={t.occurrences.release}
+              variant="secondary"
+              loading={release.isPending}
+              onPress={confirmRelease}
+            />
+          )}
+        </View>
+      )}
+
+      {claim.error instanceof AlreadyTakenError && (
+        <Text style={styles.error}>{t.occurrences.taken}</Text>
+      )}
+      {((claim.isError && !(claim.error instanceof AlreadyTakenError)) ||
+        release.isError ||
+        cancel.isError) && <Text style={styles.error}>{t.common.genericError}</Text>}
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  item: { borderLeftWidth: 8, paddingLeft: 14, paddingVertical: 8, gap: 2 },
+  item: { borderLeftWidth: 8, paddingLeft: 14, paddingVertical: 8, gap: 4 },
   cancelled: { opacity: 0.55 },
   strike: { textDecorationLine: 'line-through' },
   title: { fontSize: 22, fontWeight: '600', color: colors.text },
   line: { fontSize: 18, color: colors.muted },
+  status: { fontSize: 20, color: colors.text },
+  open: { fontWeight: '700', color: colors.open },
+  mine: { fontWeight: '700', color: colors.primary },
+  actions: { gap: 8, marginTop: 4 },
   error: { fontSize: 18, color: colors.error },
 });

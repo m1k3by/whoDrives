@@ -148,6 +148,16 @@ export const t = {
     cancelText: 'Der Termin wird für alle als abgesagt angezeigt.',
     cancel: 'Termin absagen',
     until: (time: string) => `bis ${time} Uhr`,
+    open: 'Noch offen – wer übernimmt?',
+    claim: 'Ich übernehme',
+    mine: 'Du übernimmst das.',
+    byOther: (name: string) => `Übernimmt: ${name}`,
+    formerMember: 'ehemaliges Mitglied',
+    releaseMine: 'Doch nicht – wieder freigeben',
+    release: 'Freigeben',
+    releaseTitle: (name: string) => `Zusage von ${name} aufheben?`,
+    releaseText: 'Der Termin ist danach wieder offen.',
+    taken: 'Schon vergeben – jemand anderes war schneller.',
   },
   calendar: {
     months: [
