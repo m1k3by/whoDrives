@@ -138,8 +138,6 @@ export const t = {
     },
   },
   occurrences: {
-    title: 'Die nächsten 14 Tage',
-    none: 'In den nächsten 14 Tagen steht nichts an.',
     today: 'Heute',
     tomorrow: 'Morgen',
     cancelled: 'Abgesagt',
@@ -158,6 +156,18 @@ export const t = {
     releaseTitle: (name: string) => `Zusage von ${name} aufheben?`,
     releaseText: 'Der Termin ist danach wieder offen.',
     taken: 'Schon vergeben – jemand anderes war schneller.',
+  },
+  overview: {
+    filters: {
+      all: (n: number) => `Alle (${n})`,
+      open: (n: number) => `Offen (${n})`,
+      mine: (n: number) => `Meine (${n})`,
+    },
+    empty: {
+      all: 'In den nächsten 14 Tagen steht nichts an.',
+      open: 'Alles vergeben – in den nächsten 14 Tagen ist nichts mehr offen.',
+      mine: 'Du hast in den nächsten 14 Tagen nichts übernommen.',
+    },
   },
   calendar: {
     months: [

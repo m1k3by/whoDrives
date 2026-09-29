@@ -82,15 +82,16 @@ select public.enqueue_scheduled_notifications('2030-06-03 21:00:00 Europe/Berlin
 select is((select count(*)::int from outbox_a), 3, 'later job runs do not repeat the evening message');
 delete from public.notification_outbox;
 
--- Claim -> parents except the claimer -------------------------------------------------------
+-- Claim -> all members except the claimer ---------------------------------------------------
 set local role authenticated;
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000f7"}', true);
 select public.claim_occurrence((select id from occ));
 reset role;
 select results_eq(
-  $$select user_id, title, body from outbox_a$$,
-  $$values ('00000000-0000-0000-0000-0000000000a7'::uuid, 'Termin übernommen', 'Oma übernimmt: Reiten (Lena), Di 04.06., 15:00 Uhr')$$,
-  'claim: the parent is notified, nobody else');
+  $$select user_id, title, body from outbox_a order by user_id$$,
+  $$values ('00000000-0000-0000-0000-0000000000a7'::uuid, 'Termin übernommen', 'Oma übernimmt: Reiten (Lena), Di 04.06., 15:00 Uhr'),
+           ('00000000-0000-0000-0000-0000000000e7'::uuid, 'Termin übernommen', 'Oma übernimmt: Reiten (Lena), Di 04.06., 15:00 Uhr')$$,
+  'claim: all other members are notified, not the one who claimed');
 delete from public.notification_outbox;
 
 select public.enqueue_scheduled_notifications('2030-06-04 18:00:00 Europe/Berlin');
@@ -110,14 +111,17 @@ select public.enqueue_scheduled_notifications('2030-06-04 15:01:00 Europe/Berlin
 select is((select count(*)::int from outbox_a), 1, 'no reminder after the start');
 delete from public.notification_outbox;
 
--- Parent claiming does not notify themselves ---------------------------------------------
+-- A parent claims: grandparent and other member hear about it, the parent not ------------
 set local role authenticated;
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000f7"}', true);
 select public.release_occurrence((select id from occ));
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000a7"}', true);
 select public.claim_occurrence((select id from occ));
 reset role;
-select is((select count(*)::int from outbox_a), 0, 'a parent claiming does not notify themselves');
+select results_eq(
+  $$select user_id from outbox_a order by user_id$$,
+  $$values ('00000000-0000-0000-0000-0000000000e7'::uuid), ('00000000-0000-0000-0000-0000000000f7'::uuid)$$,
+  'a parent claiming notifies grandparents and others, not themselves');
 
 -- Isolation and jobs -------------------------------------------------------------------------
 select is((select count(*)::int from outbox_a where user_id = '00000000-0000-0000-0000-0000000000b7'), 0,
