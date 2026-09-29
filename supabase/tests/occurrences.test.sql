@@ -94,12 +94,15 @@ select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000
 
 select ok((select count(*) from public.occurrences) > 0, 'grandparent sees the family occurrences');
 
-select throws_ok(
-  $$select public.cancel_occurrence((select id from public.occurrences order by starts_at limit 1))$$,
-  '42501', null, 'grandparent cannot cancel');
+-- Equal rights (2026-09-29): every member may cancel.
+select lives_ok(
+  $$select public.cancel_occurrence((select id from public.occurrences
+      where event_id = 'e5000000-0000-0000-0000-000000000004'))$$,
+  'grandparent can cancel');
 
 update public.occurrences set status = 'cancelled';
-select is((select count(*)::int from public.occurrences where status = 'cancelled'), 0,
+select is((select count(*)::int from public.occurrences
+            where status = 'cancelled' and event_id <> 'e5000000-0000-0000-0000-000000000004'), 0,
   'grandparent cannot update occurrences directly');
 
 select throws_ok(
@@ -118,14 +121,16 @@ select throws_ok(
 
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000a5"}', true);
 update public.occurrences set status = 'cancelled';
-select is((select count(*)::int from public.occurrences where status = 'cancelled'), 0,
+select is((select count(*)::int from public.occurrences
+            where status = 'cancelled' and event_id <> 'e5000000-0000-0000-0000-000000000004'), 0,
   'parent cannot update occurrences directly either');
 
 select lives_ok(
   $$select public.cancel_occurrence((select id from public.occurrences
       where event_id = 'e5000000-0000-0000-0000-000000000001' order by starts_at desc limit 1))$$,
   'parent can cancel an occurrence');
-select is((select count(*)::int from public.occurrences where status = 'cancelled'), 1,
+select is((select count(*)::int from public.occurrences
+            where status = 'cancelled' and event_id = 'e5000000-0000-0000-0000-000000000001'), 1,
   'exactly that occurrence is cancelled');
 
 -- Changing the rule rebuilds open future occurrences, keeps cancelled ones --------------

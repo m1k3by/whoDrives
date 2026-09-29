@@ -8,7 +8,9 @@ Die App heißt Who Drives? Vor der Veröffentlichung wird der Name auf Markenkon
 
 Das Grundgerüst liefert eine lauffähige Android-App mit Login, Familien-Datenmodell, abgesicherter Datenbank und automatisierter Auslieferung über Play Internal Testing. Features werden danach einzeln auf dieses Gerüst gesetzt.
 
-Die App koordiniert Termine in einer Familie: Eltern legen Termine und Fahrdienste an, auch wiederkehrend (z. B. Reiten jeden Dienstag). Großeltern und andere Mitglieder sehen offene Termine und übernehmen sie mit einem Klick. Alle sehen jederzeit, wer wann was macht.
+Die App koordiniert Termine in einer Familie: Mitglieder legen Termine und Fahrdienste an, auch wiederkehrend (z. B. Reiten jeden Dienstag), und übernehmen offene Termine mit einem Klick. Alle sehen jederzeit, wer wann was macht.
+
+**Gleiche Rechte (Entscheidung 29.09.2026):** Alle Mitglieder einer Familie dürfen dasselbe. Die Rolle (Elternteil, Großeltern, weitere Person) ist nur eine Bezeichnung.
 
 - **Phase 1 (dieses Dokument):** Android, verteilt über Google Play Internal Testing an die eigene Familie.
 - **Phase 2:** iOS über TestFlight bzw. App Store. Die Codebasis ist von Anfang an cross-platform, damit Phase 2 nur Accounts, Credentials und Store-Setup braucht.
@@ -96,7 +98,7 @@ Zentral ist die Trennung von `events` (die Regel, z. B. „Reiten jeden Dienstag
 
 - `is_family_member(family_id)`: security definer, stable. Wird von allen RLS-Policies genutzt.
 - `claim_occurrence(occurrence_id)`: setzt `assigned_to = auth.uid()` nur, wenn der Termin noch offen ist. Damit können nicht zwei Personen gleichzeitig zusagen.
-- `release_occurrence(occurrence_id)`: gibt einen übernommenen Termin wieder frei, nur durch die zugewiesene Person oder Eltern.
+- `release_occurrence(occurrence_id)`: gibt einen übernommenen Termin wieder frei; jedes Mitglied der Familie darf das.
 - `generate_occurrences()`: läuft täglich per pg_cron und hält für alle Regeln die nächsten 12 Monate vorberechnet (ursprünglich 8 Wochen; erweitert für den Monatskalender, 28.09.2026).
 
 ```sql
@@ -131,23 +133,23 @@ Die Sicherheit liegt vollständig in der Datenbank: RLS auf jeder Tabelle, Stand
 | Tabelle | Lesen | Schreiben |
 | --- | --- | --- |
 | families | Mitglieder | Anlegen: jeder eingeloggte User; ein Trigger trägt ihn als parent ein |
-| family_members | Mitglieder derselben Familie | Nur über Einladungs-Function; austreten selbst, entfernen durch Eltern |
-| children, events | Mitglieder | Nur Rolle parent |
-| occurrences | Mitglieder | Kein direktes Update; nur über claim_occurrence und release_occurrence |
-| invites | Eltern der Familie | Anlegen durch Eltern; einlösen nur über Edge Function |
+| family_members | Mitglieder derselben Familie | Nur über Einladungs-Function; austreten und entfernen durch jedes Mitglied |
+| children, events | Mitglieder | Mitglieder |
+| occurrences | Mitglieder | Kein direktes Update; nur über claim_occurrence, release_occurrence und cancel_occurrence (jedes Mitglied) |
+| invites | Mitglieder | Anlegen und zurückziehen durch Mitglieder; einlösen nur über Edge Function |
 | push_tokens | Nur eigene | Nur eigene |
 | profiles | Mitglieder gemeinsamer Familien | Nur eigenes Profil |
 
 ### Einladungen
 
-- Eltern erzeugen einen Einladungscode (8 Zeichen, ohne verwechselbare Zeichen wie 0/O) und teilen ihn über das Android-Teilen-Menü.
+- Mitglieder erzeugen einen Einladungscode (8 Zeichen, ohne verwechselbare Zeichen wie 0/O) und teilen ihn über das Android-Teilen-Menü.
 - Gespeichert wird nur der SHA-256-Hash. Der Code gilt 7 Tage und ist einmalig einlösbar.
 - Die Edge Function `redeem-invite` prüft Hash, Ablauf und Nutzung und legt dann die Mitgliedschaft an.
 
 ### Pflicht-Tests (pgTAP)
 
 - Ein User aus Familie A sieht keine einzige Zeile von Familie B.
-- Eine Person mit Rolle grandparent kann keine Events anlegen oder ändern.
+- Ein Mitglied von Familie B kann keine Events von Familie A anlegen, ändern oder löschen. (Vorher: „grandparent kann keine Events anlegen“ – entfallen durch gleiche Rechte.)
 - Ein zweites claim_occurrence auf denselben Termin ändert nichts.
 - Ein abgelaufener oder benutzter Einladungscode wird abgelehnt.
 
@@ -270,10 +272,10 @@ Nach Step 0 folgt ein Feature pro Step, jeweils als eigener PR und eigenes Relea
 | --- | --- | --- |
 | 1 Profil | Anzeigename setzen und ändern, Logout | Name erscheint in der Mitgliederliste |
 | 2 Einladung | invites, Function redeem-invite, Rollen wählen, Code teilen | Oma tritt per Code bei und sieht die Familie; abgelaufener Code wird abgelehnt |
-| 3 Kinder und Regeln | children, events; Termine einmalig oder wöchentlich anlegen | Eltern legen „Reiten, jeden Di 15 Uhr“ an; Großeltern können das nicht |
+| 3 Kinder und Regeln | children, events; Termine einmalig oder wöchentlich anlegen | „Reiten, jeden Di 15 Uhr“ ist angelegt; fremde Familien können nichts ändern |
 | 4 Termine | occurrences, pg_cron-Job, Monatskalender mit Tagesliste, Liste „nächste 14 Tage“, einzelnen Termin absagen | 12 Monate vorberechnet; Termine stimmen über die Zeitumstellung hinweg |
 | 5 Übernehmen | claim_occurrence, release_occurrence, Status mit Namen, Realtime | Zwei Handys tippen gleichzeitig: nur eins bekommt den Termin, das andere aktualisiert live |
-| 6 Push | push_tokens, Function notify, FCM über Expo | Push bei neuem offenem Termin, bei Übernahme und am Vorabend für offene Termine |
+| 6 Push | push_tokens, Function notify, FCM über Expo | Push bei neuem Termin, Übernahme, Freigabe, Absage (an alle außer dem Auslöser), am Vorabend ab 18 Uhr für offene Termine und 1 Stunde vorher an die eingetragene Person; Texte mit Uhrzeit von–bis, Ort und Namen |
 | 7 Übersicht | Filter: meine Termine, offene Termine, alle | Jeder sieht auf einen Blick, wer diese Woche was macht |
 | 8 Store-Reife | Konto löschen in der App und per Web-Link, Datenschutzerklärung, Data-Safety-Angaben | Voraussetzungen für Closed Testing und öffentliches Release erfüllt |
 

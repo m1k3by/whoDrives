@@ -7,6 +7,7 @@ Spec: [docs/SPEC.md](docs/SPEC.md). App in `mobile/` (eigene Regeln in `mobile/A
 - Migrationen nur vorwärts und abwärtskompatibel (Expand/Contract); nie eine bestehende Migration ändern.
 - Keine Secrets, kein service_role/secret Key im App-Code.
 - Vor jedem Commit: Lint, Typecheck, Tests lokal grün (`npm run lint`, `npm run typecheck`, `npm test` in `mobile/`; `npx supabase test db` im Root).
+- Alle Mitglieder einer Familie haben die gleichen Rechte; die Rolle ist nur eine Bezeichnung (Entscheidung 29.09.2026). Keine Rechte-Unterschiede einbauen.
 - UI für ältere Nutzer: große Schrift, große Buttons, klare deutsche Texte. Monatskalender nur mit großer Tagesliste darunter, keine Stunden-Zeitleiste (Entscheidung 28.09.2026). Alle Texte in `mobile/src/ui/strings.ts`.
 - Code und Bezeichner auf Englisch, Commits nach Conventional Commits.
 - Commit und Push macht nur Michael. Claude liefert die Commit-Message.

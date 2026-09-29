@@ -45,7 +45,7 @@ export default function InviteScreen() {
           onPress={() => setRole(r)}
         />
       ))}
-      <Body>{t.invite.roleHint[role]}</Body>
+      <Body>{t.invite.roleNote}</Body>
       <Button
         label={t.invite.create}
         loading={invite.isPending}

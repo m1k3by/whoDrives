@@ -72,13 +72,19 @@ select is(
 -- Acting as grandparent of family A ------------------------------------------
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-00000000000b"}', true);
 
+-- Equal rights (2026-09-29): every member may remove members of the own family.
 delete from public.family_members
  where family_id = 'a0000000-0000-0000-0000-000000000000'
    and user_id = '00000000-0000-0000-0000-00000000000a';
+reset role;
 select is(
   (select count(*)::int from public.family_members
     where user_id = '00000000-0000-0000-0000-00000000000a'),
-  1, 'grandparent cannot remove another member');
+  0, 'grandparent can remove another member of the own family');
+-- put the parent back for the following tests
+insert into public.family_members (family_id, user_id, role)
+values ('a0000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-00000000000a', 'parent');
+set local role authenticated;
 
 -- Acting as parent of family B -----------------------------------------------
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-00000000000c"}', true);

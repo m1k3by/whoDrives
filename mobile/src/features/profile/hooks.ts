@@ -37,6 +37,20 @@ export function useUpdateDisplayName() {
   });
 }
 
+/** Deletes the account on the server, then clears the session on this device. */
+export function useDeleteAccount() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.functions.invoke('delete-account');
+      if (error) throw error;
+      // The session is invalid now; only clear it locally.
+      await supabase.auth.signOut({ scope: 'local' });
+      queryClient.clear();
+    },
+  });
+}
+
 export function useLogout() {
   const queryClient = useQueryClient();
   return async () => {

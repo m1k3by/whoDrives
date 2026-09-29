@@ -22,12 +22,11 @@ export function useMyFamily() {
   });
 }
 
-/** My family plus whether I am a parent in it (both queries are cached). */
+/** My family and my user id (both queries are cached). */
 export function useMyMembership() {
   const profile = useMyProfile();
   const family = useMyFamily();
-  const me = family.data?.family_members.find((m) => m.user_id === profile.data?.id);
-  return { family: family.data, myId: profile.data?.id, isParent: me?.role === 'parent' };
+  return { family: family.data, myId: profile.data?.id };
 }
 
 export function useRemoveMember() {

@@ -70,31 +70,30 @@ select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000
 select is((select count(*)::int from public.events), 2, 'grandparent sees the family events');
 select is((select count(*)::int from public.children), 1, 'grandparent sees the family children');
 
-select throws_ok(
-  $$insert into public.events (family_id, child_id, title, start_time, first_date)
-    values ('a3000000-0000-0000-0000-000000000000', 'c3000000-0000-0000-0000-00000000000a',
-            'Oma-Termin', '10:00', '2026-10-06')$$,
-  '42501', null, 'grandparent cannot create events');
+-- Equal rights (2026-09-29): grandparents may do everything parents may do.
+select lives_ok(
+  $$insert into public.events (id, family_id, child_id, title, start_time, first_date)
+    values ('e3000000-0000-0000-0000-00000000000b', 'a3000000-0000-0000-0000-000000000000',
+            'c3000000-0000-0000-0000-00000000000a', 'Oma-Termin', '10:00', '2026-10-06')$$,
+  'grandparent can create events');
 
-select throws_ok(
+select lives_ok(
   $$insert into public.children (family_id, first_name, color)
     values ('a3000000-0000-0000-0000-000000000000', 'Max', '#000000')$$,
-  '42501', null, 'grandparent cannot add children');
+  'grandparent can add children');
 
 update public.events set title = 'Geändert' where id = 'e3000000-0000-0000-0000-00000000000a';
-delete from public.events where id = 'e3000000-0000-0000-0000-00000000000a';
-reset role;
-select is(
-  (select title from public.events where id = 'e3000000-0000-0000-0000-00000000000a'),
-  'Reiten', 'grandparent cannot change or delete events');
+delete from public.events where id = 'e3000000-0000-0000-0000-00000000000b';
+select results_eq(
+  $$select title from public.events where id in ('e3000000-0000-0000-0000-00000000000a',
+                                                'e3000000-0000-0000-0000-00000000000b')$$,
+  $$values ('Geändert')$$,
+  'grandparent can change and delete events');
 
-update public.children set first_name = 'Geändert' where id = 'c3000000-0000-0000-0000-00000000000a';
-set local role authenticated;
-select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000f3"}', true);
-update public.children set first_name = 'Hacked' where id = 'c3000000-0000-0000-0000-00000000000a';
+update public.children set first_name = 'Lena M.' where id = 'c3000000-0000-0000-0000-00000000000a';
 select is(
   (select first_name from public.children where id = 'c3000000-0000-0000-0000-00000000000a'),
-  'Geändert', 'grandparent cannot change children');
+  'Lena M.', 'grandparent can change children');
 
 -- Parent of family B ------------------------------------------------------------------
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000b3"}', true);

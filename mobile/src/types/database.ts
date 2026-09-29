@@ -243,7 +243,10 @@ isOneToOne: false
             [_ in never]: never
           }
           Functions: {
-            "cancel_occurrence":
+            "actor_name":
+{ Args: { "p_user_id": string }; Returns: string
+                           },
+"cancel_occurrence":
 { Args: { "p_occurrence_id": string }; Returns: undefined
                            },
 "claim_occurrence":
@@ -279,9 +282,6 @@ isOneToOne: false
 { Args: { "p_code": string }; Returns: string
                            },
 "is_family_member":
-{ Args: { "p_family_id": string }; Returns: boolean
-                           },
-"is_family_parent":
 { Args: { "p_family_id": string }; Returns: boolean
                            },
 "redeem_invite":

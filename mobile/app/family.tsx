@@ -7,18 +7,16 @@ import { Body, Button, colors, Loading, Screen } from '@/ui/components';
 import { t } from '@/ui/strings';
 
 export default function FamilyScreen() {
-  const { family, myId, isParent } = useMyMembership();
+  const { family, myId } = useMyMembership();
   if (!family) return <Loading />;
   const { id: familyId, name: familyName } = family;
 
   return (
     <Screen>
-      {isParent && (
-        <Button
-          label={t.invite.title}
-          onPress={() => router.push({ pathname: '/invite', params: { familyId, familyName } })}
-        />
-      )}
+      <Button
+        label={t.invite.title}
+        onPress={() => router.push({ pathname: '/invite', params: { familyId, familyName } })}
+      />
       <Text style={styles.heading}>{t.family.members}</Text>
       {family.family_members.map((m) => (
         <View key={m.user_id} style={styles.member}>
@@ -27,7 +25,7 @@ export default function FamilyScreen() {
             {m.user_id === myId ? ` ${t.family.you}` : ''}
           </Text>
           <Text style={styles.memberRole}>{t.family.roles[m.role]}</Text>
-          {isParent && m.user_id !== myId && (
+          {m.user_id !== myId && (
             <RemoveMemberButton
               familyId={familyId}
               userId={m.user_id}
@@ -36,7 +34,7 @@ export default function FamilyScreen() {
           )}
         </View>
       ))}
-      {isParent && <OpenInvites familyId={familyId} />}
+      <OpenInvites familyId={familyId} />
     </Screen>
   );
 }

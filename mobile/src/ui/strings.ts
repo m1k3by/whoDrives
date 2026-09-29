@@ -25,6 +25,15 @@ export const t = {
     logout: 'Abmelden',
     logoutTitle: 'Abmelden?',
     logoutText: 'Zum erneuten Anmelden brauchst du wieder einen Code per E-Mail.',
+    privacy: 'Datenschutzerklärung',
+    delete: 'Konto löschen',
+    deleteTitle: 'Konto endgültig löschen?',
+    deleteText:
+      'Dein Name, deine E-Mail-Adresse und deine Mitgliedschaften werden gelöscht. ' +
+      'Termine, die du übernommen hast, bleiben für die anderen als „ehemaliges Mitglied“ sichtbar. ' +
+      'Bist du das letzte Mitglied deiner Familie, wird die Familie mit allen Kindern und Terminen gelöscht. ' +
+      'Das lässt sich nicht rückgängig machen.',
+    deleteConfirm: 'Endgültig löschen',
   },
   login: {
     title: 'Anmelden',
@@ -60,11 +69,7 @@ export const t = {
   invite: {
     title: 'Mitglied einladen',
     chooseRole: 'Als was lädst du die Person ein?',
-    roleHint: {
-      parent: 'Kann Termine anlegen und weitere Mitglieder einladen.',
-      grandparent: 'Sieht alle Termine und kann sie übernehmen.',
-      other: 'Sieht alle Termine und kann sie übernehmen.',
-    },
+    roleNote: 'Die Rolle ist nur eine Bezeichnung – alle Mitglieder haben die gleichen Rechte.',
     create: 'Code erstellen',
     codeIntro: (role: string) => `Einladungscode (${role}):`,
     validUntil: (date: string) => `Gilt bis ${date} und nur für eine Person.`,

@@ -64,9 +64,9 @@ select is(
 
 -- Release ---------------------------------------------------------------------------------
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000e6"}', true);
-select throws_ok(
-  $$select public.release_occurrence((select reiten from ids))$$,
-  '42501', null, 'other member cannot release someone else''s claim');
+select is(
+  (select assigned_to from public.occurrences where id = (select reiten from ids)),
+  '00000000-0000-0000-0000-0000000000f6'::uuid, 'every member sees who took it');
 
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000b6"}', true);
 select throws_ok(
@@ -83,8 +83,9 @@ select results_eq(
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000e6"}', true);
 select is(public.claim_occurrence((select reiten from ids)), true, 'released occurrence can be claimed again');
 
-select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000a6"}', true);
-select is(public.release_occurrence((select reiten from ids)), true, 'parent can release someone else''s claim');
+-- equal rights (2026-09-29): any member may release someone else's claim
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000f6"}', true);
+select is(public.release_occurrence((select reiten from ids)), true, 'grandparent can release someone else''s claim');
 select is(public.release_occurrence((select reiten from ids)), false, 'releasing an open occurrence returns false');
 
 reset role;

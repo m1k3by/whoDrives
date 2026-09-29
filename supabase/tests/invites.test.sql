@@ -57,10 +57,11 @@ select throws_ok(
   '42501', null, 'app users cannot call redeem_invite directly (only the Edge Function)');
 
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000b1"}', true);
-select throws_ok(
+-- Equal rights (2026-09-29): every member invites and sees the family's invites.
+select lives_ok(
   $$select * from public.create_invite('a1000000-0000-0000-0000-000000000000', 'parent')$$,
-  '42501', null, 'grandparent cannot create invites');
-select is((select count(*)::int from public.invites), 0, 'grandparent sees no invites');
+  'grandparent can create invites');
+select is((select count(*)::int from public.invites), 4, 'grandparent sees the family invites');
 
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000c1"}', true);
 select throws_ok(

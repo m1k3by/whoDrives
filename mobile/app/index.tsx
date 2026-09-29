@@ -50,21 +50,12 @@ export default function HomeScreen() {
   }
   if (!family.data) return <CreateFamily />;
 
-  const isParent = family.data.family_members.some(
-    (m) => m.user_id === profile.data.id && m.role === 'parent',
-  );
-
   return (
     <Screen>
       <Title>{family.data.name}</Title>
       <MonthCalendar familyId={family.data.id} selected={selected} onSelect={setSelected} />
       <Text style={styles.heading}>{dayLabel(selected, new Date())}</Text>
-      <DayList
-        familyId={family.data.id}
-        day={selected}
-        myId={profile.data.id}
-        isParent={isParent}
-      />
+      <DayList familyId={family.data.id} day={selected} myId={profile.data.id} />
       <Button label={t.calendar.upcoming} onPress={() => router.push('/upcoming')} />
       <Button label={t.events.title} variant="secondary" onPress={() => router.push('/events')} />
       <Button
@@ -83,17 +74,7 @@ export default function HomeScreen() {
 }
 
 /** Occurrences of one day; uses the (cached) query of the calendar month. */
-function DayList({
-  familyId,
-  day,
-  myId,
-  isParent,
-}: {
-  familyId: string;
-  day: Date;
-  myId: string;
-  isParent: boolean;
-}) {
+function DayList({ familyId, day, myId }: { familyId: string; day: Date; myId: string }) {
   const month = addMonths(day, 0);
   const occurrences = useOccurrences(familyId, month, addMonths(month, 1));
 
@@ -113,13 +94,7 @@ function DayList({
   return (
     <>
       {items.map((o) => (
-        <OccurrenceItem
-          key={o.id}
-          occurrence={o}
-          dayLabel={label}
-          myId={myId}
-          isParent={isParent}
-        />
+        <OccurrenceItem key={o.id} occurrence={o} dayLabel={label} myId={myId} />
       ))}
     </>
   );

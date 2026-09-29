@@ -20,7 +20,7 @@ function nextTwoWeeks() {
 
 /** Overview: who does what in the next 14 days, filtered by all / open / mine. */
 export default function UpcomingScreen() {
-  const { family, myId, isParent } = useMyMembership();
+  const { family, myId } = useMyMembership();
   const [[from, to]] = useState(nextTwoWeeks);
   const [filter, setFilter] = useState<OccurrenceFilter>('all');
   const occurrences = useOccurrences(family?.id, from, to);
@@ -55,13 +55,7 @@ export default function UpcomingScreen() {
         <View key={day.label} style={styles.day}>
           <Text style={styles.dayLabel}>{day.label}</Text>
           {day.items.map((o) => (
-            <OccurrenceItem
-              key={o.id}
-              occurrence={o}
-              dayLabel={day.label}
-              myId={myId}
-              isParent={isParent}
-            />
+            <OccurrenceItem key={o.id} occurrence={o} dayLabel={day.label} myId={myId} />
           ))}
         </View>
       ))}

@@ -9,7 +9,7 @@ import { t } from '@/ui/strings';
 const PALETTE = Object.keys(t.children.colors) as (keyof typeof t.children.colors)[];
 
 export default function ChildrenScreen() {
-  const { family, isParent } = useMyMembership();
+  const { family } = useMyMembership();
   const children = useChildren(family?.id);
 
   if (children.isPending) return <Loading />;
@@ -29,7 +29,7 @@ export default function ChildrenScreen() {
           <Text style={styles.name}>{c.first_name}</Text>
         </View>
       ))}
-      {isParent && family && <AddChild familyId={family.id} />}
+      {family && <AddChild familyId={family.id} />}
     </Screen>
   );
 }

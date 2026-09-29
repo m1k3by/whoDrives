@@ -1,13 +1,14 @@
 begin;
-select plan(20);
+select plan(23);
 
--- Family A: parent p, grandparent g, other o. Family B: parent x.
+-- Family A: parent p (Mama), grandparent g (Oma), other o. Family B: parent x.
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-0000000000a7', 'parent-a@test.local'),
   ('00000000-0000-0000-0000-0000000000f7', 'grandparent-a@test.local'),
   ('00000000-0000-0000-0000-0000000000e7', 'other-a@test.local'),
   ('00000000-0000-0000-0000-0000000000b7', 'parent-b@test.local');
 update public.profiles set display_name = 'Oma' where id = '00000000-0000-0000-0000-0000000000f7';
+update public.profiles set display_name = 'Mama' where id = '00000000-0000-0000-0000-0000000000a7';
 
 insert into public.families (id, name, created_by) values
   ('a7000000-0000-0000-0000-000000000000', 'Familie A', '00000000-0000-0000-0000-0000000000a7'),
@@ -46,17 +47,18 @@ select is((select user_id from public.push_tokens where token = 'ExponentPushTok
 set local role authenticated;
 select is((select count(*)::int from public.notification_outbox), 0, 'app users cannot read the outbox');
 
--- New event -> everybody except the creator -------------------------------------------------
+-- New event -> everybody except the creator, with time range, place and creator -------------
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000a7"}', true);
-insert into public.events (id, family_id, child_id, title, start_time, rrule, first_date)
+insert into public.events (id, family_id, child_id, title, location, start_time, rrule, first_date)
 values ('e7000000-0000-0000-0000-000000000000', 'a7000000-0000-0000-0000-000000000000',
-        'c7000000-0000-0000-0000-000000000000', 'Reiten', '15:00', 'FREQ=WEEKLY;BYDAY=TU', '2030-06-04');
+        'c7000000-0000-0000-0000-000000000000', 'Reiten', 'Reitstall Sonnenhof', '15:00',
+        'FREQ=WEEKLY;BYDAY=TU', '2030-06-04');
 reset role;
 select results_eq(
   $$select user_id, title, body from outbox_a order by user_id$$,
-  $$values ('00000000-0000-0000-0000-0000000000e7'::uuid, 'Neuer Termin – wer kann?', 'Reiten (Lena), jeden Dienstag, 15:00 Uhr'),
-           ('00000000-0000-0000-0000-0000000000f7'::uuid, 'Neuer Termin – wer kann?', 'Reiten (Lena), jeden Dienstag, 15:00 Uhr')$$,
-  'new event: all members except the creator are notified');
+  $$values ('00000000-0000-0000-0000-0000000000e7'::uuid, 'Neuer Termin – wer kann?', 'Reiten (Lena), jeden Dienstag, 15:00–16:00 Uhr, Reitstall Sonnenhof · angelegt von Mama'),
+           ('00000000-0000-0000-0000-0000000000f7'::uuid, 'Neuer Termin – wer kann?', 'Reiten (Lena), jeden Dienstag, 15:00–16:00 Uhr, Reitstall Sonnenhof · angelegt von Mama')$$,
+  'new event: all members except the creator, with time range, place and creator');
 delete from public.notification_outbox;
 
 -- one concrete occurrence far in the future for the time-based checks
@@ -72,9 +74,9 @@ select is((select count(*)::int from outbox_a), 0, 'no evening message before 18
 select public.enqueue_scheduled_notifications('2030-06-03 18:00:00 Europe/Berlin');
 select results_eq(
   $$select user_id, title, body from outbox_a order by user_id$$,
-  $$values ('00000000-0000-0000-0000-0000000000a7'::uuid, 'Morgen noch offen – wer übernimmt?', 'Reiten (Lena), Di 04.06., 15:00 Uhr'),
-           ('00000000-0000-0000-0000-0000000000e7'::uuid, 'Morgen noch offen – wer übernimmt?', 'Reiten (Lena), Di 04.06., 15:00 Uhr'),
-           ('00000000-0000-0000-0000-0000000000f7'::uuid, 'Morgen noch offen – wer übernimmt?', 'Reiten (Lena), Di 04.06., 15:00 Uhr')$$,
+  $$values ('00000000-0000-0000-0000-0000000000a7'::uuid, 'Morgen noch offen – wer übernimmt?', 'Reiten (Lena), Di 04.06., 15:00–16:00 Uhr, Reitstall Sonnenhof'),
+           ('00000000-0000-0000-0000-0000000000e7'::uuid, 'Morgen noch offen – wer übernimmt?', 'Reiten (Lena), Di 04.06., 15:00–16:00 Uhr, Reitstall Sonnenhof'),
+           ('00000000-0000-0000-0000-0000000000f7'::uuid, 'Morgen noch offen – wer übernimmt?', 'Reiten (Lena), Di 04.06., 15:00–16:00 Uhr, Reitstall Sonnenhof')$$,
   'from 18:00 the evening before: all members get the open occurrence');
 
 select public.enqueue_scheduled_notifications('2030-06-03 18:05:00 Europe/Berlin');
@@ -89,8 +91,8 @@ select public.claim_occurrence((select id from occ));
 reset role;
 select results_eq(
   $$select user_id, title, body from outbox_a order by user_id$$,
-  $$values ('00000000-0000-0000-0000-0000000000a7'::uuid, 'Termin übernommen', 'Oma übernimmt: Reiten (Lena), Di 04.06., 15:00 Uhr'),
-           ('00000000-0000-0000-0000-0000000000e7'::uuid, 'Termin übernommen', 'Oma übernimmt: Reiten (Lena), Di 04.06., 15:00 Uhr')$$,
+  $$values ('00000000-0000-0000-0000-0000000000a7'::uuid, 'Termin übernommen', 'Oma übernimmt: Reiten (Lena), Di 04.06., 15:00–16:00 Uhr, Reitstall Sonnenhof'),
+           ('00000000-0000-0000-0000-0000000000e7'::uuid, 'Termin übernommen', 'Oma übernimmt: Reiten (Lena), Di 04.06., 15:00–16:00 Uhr, Reitstall Sonnenhof')$$,
   'claim: all other members are notified, not the one who claimed');
 delete from public.notification_outbox;
 
@@ -105,23 +107,56 @@ select public.enqueue_scheduled_notifications('2030-06-04 14:00:00 Europe/Berlin
 select public.enqueue_scheduled_notifications('2030-06-04 14:05:00 Europe/Berlin');
 select results_eq(
   $$select user_id, title, body from outbox_a$$,
-  $$values ('00000000-0000-0000-0000-0000000000f7'::uuid, 'Gleich geht''s los', 'Reiten (Lena), Di 04.06., 15:00 Uhr')$$,
+  $$values ('00000000-0000-0000-0000-0000000000f7'::uuid, 'Gleich geht''s los', 'Reiten (Lena), Di 04.06., 15:00–16:00 Uhr, Reitstall Sonnenhof')$$,
   'one hour before: exactly one reminder for the assigned person');
 select public.enqueue_scheduled_notifications('2030-06-04 15:01:00 Europe/Berlin');
 select is((select count(*)::int from outbox_a), 1, 'no reminder after the start');
 delete from public.notification_outbox;
 
--- A parent claims: grandparent and other member hear about it, the parent not ------------
+-- Release -> all others ---------------------------------------------------------------------
 set local role authenticated;
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000f7"}', true);
 select public.release_occurrence((select id from occ));
+reset role;
+select results_eq(
+  $$select user_id, title, body from outbox_a order by user_id$$,
+  $$values ('00000000-0000-0000-0000-0000000000a7'::uuid, 'Wieder offen – wer übernimmt?', 'Oma kann doch nicht: Reiten (Lena), Di 04.06., 15:00–16:00 Uhr, Reitstall Sonnenhof'),
+           ('00000000-0000-0000-0000-0000000000e7'::uuid, 'Wieder offen – wer übernimmt?', 'Oma kann doch nicht: Reiten (Lena), Di 04.06., 15:00–16:00 Uhr, Reitstall Sonnenhof')$$,
+  'release by the assigned person: all others hear it is open again');
+delete from public.notification_outbox;
+
+-- Parent claims: the others hear about it, the parent not -----------------------------------
+set local role authenticated;
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000a7"}', true);
 select public.claim_occurrence((select id from occ));
 reset role;
 select results_eq(
   $$select user_id from outbox_a order by user_id$$,
   $$values ('00000000-0000-0000-0000-0000000000e7'::uuid), ('00000000-0000-0000-0000-0000000000f7'::uuid)$$,
-  'a parent claiming notifies grandparents and others, not themselves');
+  'a parent claiming notifies the others, not themselves');
+delete from public.notification_outbox;
+
+-- Someone else releases Mama's claim ------------------------------------------------------------
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000f7"}', true);
+select public.release_occurrence((select id from occ));
+reset role;
+select is(
+  (select body from outbox_a where user_id = '00000000-0000-0000-0000-0000000000a7'),
+  'Oma hat die Zusage von Mama aufgehoben: Reiten (Lena), Di 04.06., 15:00–16:00 Uhr, Reitstall Sonnenhof',
+  'release of someone else''s claim says who did it');
+delete from public.notification_outbox;
+
+-- Cancel -> all others --------------------------------------------------------------------------
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000a7"}', true);
+select public.cancel_occurrence((select id from occ));
+reset role;
+select results_eq(
+  $$select user_id, title, body from outbox_a order by user_id$$,
+  $$values ('00000000-0000-0000-0000-0000000000e7'::uuid, 'Termin abgesagt', 'Mama hat abgesagt: Reiten (Lena), Di 04.06., 15:00–16:00 Uhr, Reitstall Sonnenhof'),
+           ('00000000-0000-0000-0000-0000000000f7'::uuid, 'Termin abgesagt', 'Mama hat abgesagt: Reiten (Lena), Di 04.06., 15:00–16:00 Uhr, Reitstall Sonnenhof')$$,
+  'cancel: all others are notified');
 
 -- Isolation and jobs -------------------------------------------------------------------------
 select is((select count(*)::int from outbox_a where user_id = '00000000-0000-0000-0000-0000000000b7'), 0,

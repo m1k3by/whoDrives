@@ -50,7 +50,7 @@ jest.mock('@/features/occurrences/hooks', () => ({
   AlreadyTakenError: class extends Error {},
 }));
 jest.mock('@/features/family/hooks', () => ({
-  useMyMembership: () => ({ family: { id: 'fam-1' }, myId: 'user-oma', isParent: false }),
+  useMyMembership: () => ({ family: { id: 'fam-1' }, myId: 'user-oma' }),
 }));
 
 beforeAll(() => jest.useFakeTimers({ now: new Date(2026, 9, 5, 12, 0) })); // Mon 05.10.2026

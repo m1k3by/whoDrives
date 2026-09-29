@@ -21,19 +21,17 @@ set local role authenticated;
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000a4"}', true);
 insert into codes select code from public.create_invite('a4000000-0000-0000-0000-000000000000', 'other');
 
--- grandparent and parent of another family cannot revoke
-select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000f4"}', true);
-delete from public.invites;
+-- a parent of another family cannot revoke
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000b4"}', true);
 delete from public.invites;
 reset role;
 select is((select count(*)::int from public.invites where family_id = 'a4000000-0000-0000-0000-000000000000'),
-  1, 'only parents of the family can revoke');
+  1, 'members of another family cannot revoke');
 
--- parent revokes
+-- equal rights (2026-09-29): the grandparent revokes
 set local role authenticated;
-select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000a4"}', true);
-select lives_ok($$delete from public.invites$$, 'parent can revoke');
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000f4"}', true);
+select lives_ok($$delete from public.invites$$, 'grandparent can revoke');
 reset role;
 select is((select count(*)::int from public.invites where family_id = 'a4000000-0000-0000-0000-000000000000'),
   0, 'revoked invite is gone');

@@ -8,7 +8,7 @@ import { Body, Button, colors, Loading, Screen } from '@/ui/components';
 import { t } from '@/ui/strings';
 
 export default function EventsScreen() {
-  const { family, isParent } = useMyMembership();
+  const { family } = useMyMembership();
   const events = useEvents(family?.id);
 
   if (events.isPending) return <Loading />;
@@ -21,7 +21,7 @@ export default function EventsScreen() {
 
   return (
     <Screen>
-      {isParent && <Button label={t.events.new} onPress={() => router.push('/event-new')} />}
+      <Button label={t.events.new} onPress={() => router.push('/event-new')} />
       {events.data.length === 0 && <Body>{t.events.none}</Body>}
       {events.data.map((e) => (
         <View

@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Datenschutzerklärung – Who Drives?</title>
+<style>
+  body { font-family: system-ui, sans-serif; font-size: 18px; line-height: 1.6; max-width: 46rem; margin: 0 auto; padding: 1.5rem; color: #1a1a1a; }
+  h1 { font-size: 1.8rem; } h2 { font-size: 1.3rem; margin-top: 2rem; }
+  .todo { background: #fff3cd; padding: 0 .25rem; }
+</style>
+</head>
+<body>
+<!--
+  ENTWURF. Vor dem Hochladen:
+  1. Alle Stellen mit class="todo" ausfüllen bzw. prüfen und die Markierung entfernen.
+  2. Rechtlich prüfen lassen (Rechtsgrundlagen, Drittlandübermittlung). Dieser Text
+     beschreibt nur, welche Daten die App technisch verarbeitet.
+-->
+<h1>Datenschutzerklärung für die App „Who Drives?“</h1>
+<p>Stand: <span class="todo">[Datum]</span></p>
+
+<h2>1. Verantwortlicher</h2>
+<p><span class="todo">[Vor- und Nachname]<br>[Straße, Hausnummer]<br>[PLZ Ort]<br>E-Mail: [Kontaktadresse]</span></p>
+
+<h2>2. Wofür die App da ist</h2>
+<p>„Who Drives?“ hilft einer Familie, Termine und Fahrdienste für die Kinder abzustimmen: Eltern legen Termine an, Familienmitglieder übernehmen sie. Die App zeigt keine Werbung und enthält keine Analyse- oder Tracking-Werkzeuge.</p>
+
+<h2>3. Welche Daten verarbeitet werden</h2>
+<ul>
+  <li><strong>E-Mail-Adresse</strong> – für die Anmeldung per Einmal-Code.</li>
+  <li><strong>Anzeigename</strong> – damit die Familie sieht, wer einen Termin übernimmt.</li>
+  <li><strong>Familienzugehörigkeit und Rolle</strong> (Elternteil, Großeltern, weitere Person).</li>
+  <li><strong>Vornamen und eine Farbe je Kind</strong> – keine Fotos, kein Geburtsdatum.</li>
+  <li><strong>Termine</strong>: Titel, Art, Ort (freiwillig), Datum, Uhrzeit, Dauer, Wiederholung, Absagen und wer einen Termin übernommen hat.</li>
+  <li><strong>Push-Token des Geräts</strong> – eine technische Kennung, um Benachrichtigungen zuzustellen, nur wenn du Benachrichtigungen erlaubst.</li>
+  <li><strong>Einladungscodes</strong> – gespeichert wird nur ein nicht umkehrbarer Hash, der Code gilt 7 Tage.</li>
+</ul>
+<p>Sichtbar sind diese Daten nur für die Mitglieder der eigenen Familie.</p>
+
+<h2>4. Rechtsgrundlage</h2>
+<p class="todo">[PRÜFEN: z. B. Art. 6 Abs. 1 lit. b DSGVO (Bereitstellung der App) bzw. lit. a (Einwilligung, z. B. für Benachrichtigungen)]</p>
+
+<h2>5. Dienstleister und Speicherort</h2>
+<ul>
+  <li><strong>Supabase</strong> (Datenbank, Anmeldung, Serverfunktionen). Die Daten liegen in einem Rechenzentrum in Frankfurt am Main (EU). <span class="todo">[Auftragsverarbeitungsvertrag im Supabase-Dashboard abgeschlossen am …]</span></li>
+  <li><strong>Expo / 650 Industries, Inc.</strong> (USA) – stellt Push-Benachrichtigungen zu und liefert App-Updates aus. Dabei werden das Push-Token und der Text der Benachrichtigung übermittelt; der Text enthält den Termin mit Datum, Uhrzeit und Ort, den Vornamen des Kindes und den Anzeigenamen des Familienmitglieds, das etwas angelegt, übernommen, freigegeben oder abgesagt hat.</li>
+  <li><strong>Google Firebase Cloud Messaging</strong> (Google) – Zustellung der Benachrichtigungen auf Android-Geräte.</li>
+  <li><strong>E-Mail-Versand</strong> für die Anmeldecodes: <span class="todo">[Dienst, z. B. Resend oder Brevo, mit Sitz/Serverstandort]</span></li>
+  <li><strong>Google Play</strong> – Verteilung der App.</li>
+</ul>
+<p class="todo">[PRÜFEN: Grundlage der Übermittlung in die USA (Expo, Google), z. B. EU-US Data Privacy Framework oder Standardvertragsklauseln]</p>
+
+<h2>6. Wie lange Daten gespeichert werden</h2>
+<ul>
+  <li>Deine Daten bleiben gespeichert, bis du dein Konto löschst.</li>
+  <li>Beim Löschen werden Name, E-Mail-Adresse, Mitgliedschaften, Push-Tokens und noch nicht zugestellte Benachrichtigungen gelöscht. Termine, die du übernommen hattest, bleiben für die Familie ohne deinen Namen als „ehemaliges Mitglied“ sichtbar.</li>
+  <li>Verlässt das letzte Mitglied eine Familie oder löscht sein Konto, wird die Familie mit allen Kindern und Terminen gelöscht.</li>
+  <li>Einladungscodes verfallen nach 7 Tagen.</li>
+</ul>
+
+<h2>7. Konto löschen</h2>
+<p>In der App unter <strong>Mein Profil → Konto löschen</strong>, oder wie auf der Seite <a href="konto-loeschen.html">Konto löschen</a> beschrieben.</p>
+
+<h2>8. Deine Rechte</h2>
+<p>Du hast das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch. Schreib dafür an die oben genannte E-Mail-Adresse. Außerdem kannst du dich bei einer Datenschutz-Aufsichtsbehörde beschweren, z. B. <span class="todo">[zuständige Landesbehörde]</span>.</p>
+</body>
+</html>

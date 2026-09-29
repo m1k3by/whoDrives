@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import { Alert, type AlertButton } from 'react-native';
 
 import type { Occurrence } from './hooks';
 import { OccurrenceItem } from './OccurrenceItem';
@@ -14,7 +15,10 @@ jest.mock('@/lib/supabase', () => ({
 
 beforeAll(() => jest.useFakeTimers({ now: new Date(2026, 9, 5, 12, 0) })); // Mon 05.10.2026
 afterAll(() => jest.useRealTimers());
-beforeEach(() => mockRpc.mockReset());
+beforeEach(() => {
+  mockRpc.mockReset();
+  jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+});
 
 const OMA = 'user-oma';
 const MAMA = 'user-mama';
@@ -35,18 +39,23 @@ const occurrence = (patch: Partial<Occurrence> = {}): Occurrence => ({
   ...patch,
 });
 
-async function show(o: Occurrence, myId: string, isParent: boolean) {
+async function show(o: Occurrence, myId: string) {
   const client = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
   await render(
     <QueryClientProvider client={client}>
-      <OccurrenceItem occurrence={o} dayLabel="Dienstag, 06.10." myId={myId} isParent={isParent} />
+      <OccurrenceItem occurrence={o} dayLabel="Dienstag, 06.10." myId={myId} />
     </QueryClientProvider>,
   );
 }
 
+function pressAlertButton(text: string) {
+  const buttons = (jest.mocked(Alert.alert).mock.calls.at(-1)?.[2] ?? []) as AlertButton[];
+  buttons.find((b) => b.text === text)?.onPress?.();
+}
+
 test('open occurrence: grandparent takes it over', async () => {
   mockRpc.mockResolvedValue({ data: true, error: null });
-  await show(occurrence(), OMA, false);
+  await show(occurrence(), OMA);
 
   expect(screen.getByText('Noch offen – wer übernimmt?')).toBeTruthy();
   await fireEvent.press(screen.getByText('Ich übernehme'));
@@ -55,7 +64,7 @@ test('open occurrence: grandparent takes it over', async () => {
 
 test('someone else was faster: explains it', async () => {
   mockRpc.mockResolvedValue({ data: false, error: null });
-  await show(occurrence(), OMA, false);
+  await show(occurrence(), OMA);
 
   await fireEvent.press(screen.getByText('Ich übernehme'));
   expect(await screen.findByText('Schon vergeben – jemand anderes war schneller.')).toBeTruthy();
@@ -66,7 +75,6 @@ test('claimed by me: can give it back', async () => {
   await show(
     occurrence({ status: 'claimed', assigned_to: OMA, profiles: { display_name: 'Oma' } }),
     OMA,
-    false,
   );
 
   expect(screen.getByText('Du übernimmst das.')).toBeTruthy();
@@ -75,43 +83,48 @@ test('claimed by me: can give it back', async () => {
   expect(mockRpc).toHaveBeenCalledWith('release_occurrence', { p_occurrence_id: 'occ-1' });
 });
 
-test('claimed by someone else: grandparent only sees the name', async () => {
+// Equal rights (2026-09-29): every member may release someone else's claim.
+test('claimed by someone else: grandparent sees the name and may release after confirming', async () => {
+  mockRpc.mockResolvedValue({ data: true, error: null });
   await show(
     occurrence({ status: 'claimed', assigned_to: MAMA, profiles: { display_name: 'Mama' } }),
     OMA,
-    false,
   );
 
   expect(screen.getByText('Übernimmt: Mama')).toBeTruthy();
   expect(screen.queryByText('Ich übernehme')).toBeNull();
-  expect(screen.queryByText('Freigeben')).toBeNull();
+  await fireEvent.press(screen.getByText('Freigeben'));
+  expect(mockRpc).not.toHaveBeenCalled();
+  pressAlertButton('Freigeben');
+  await waitFor(() =>
+    expect(mockRpc).toHaveBeenCalledWith('release_occurrence', { p_occurrence_id: 'occ-1' }),
+  );
 });
 
-test('claimed by someone else: parent may release it', async () => {
-  await show(
-    occurrence({ status: 'claimed', assigned_to: OMA, profiles: { display_name: 'Oma' } }),
-    MAMA,
-    true,
-  );
+test('every member can cancel by tapping the entry and confirming', async () => {
+  mockRpc.mockResolvedValue({ data: null, error: null });
+  await show(occurrence(), OMA);
 
-  expect(screen.getByText('Übernimmt: Oma')).toBeTruthy();
-  expect(screen.getByText('Freigeben')).toBeTruthy();
+  await fireEvent.press(screen.getByText(/Reiten/));
+  pressAlertButton('Termin absagen');
+  await waitFor(() =>
+    expect(mockRpc).toHaveBeenCalledWith('cancel_occurrence', { p_occurrence_id: 'occ-1' }),
+  );
 });
 
 test('claim of a deleted account shows "ehemaliges Mitglied"', async () => {
-  await show(occurrence({ status: 'claimed', assigned_to: null }), OMA, false);
+  await show(occurrence({ status: 'claimed', assigned_to: null }), OMA);
   expect(screen.getByText('Übernimmt: ehemaliges Mitglied')).toBeTruthy();
 });
 
 test('cancelled or past occurrences cannot be taken', async () => {
-  await show(occurrence({ status: 'cancelled' }), OMA, false);
+  await show(occurrence({ status: 'cancelled' }), OMA);
   expect(screen.getByText('Abgesagt')).toBeTruthy();
   expect(screen.queryByText('Ich übernehme')).toBeNull();
 
   await show(
     occurrence({ starts_at: '2026-10-04T13:00:00Z', ends_at: '2026-10-04T14:00:00Z' }),
     OMA,
-    false,
   );
   expect(screen.queryByText('Ich übernehme')).toBeNull();
 });

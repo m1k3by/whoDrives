@@ -14,18 +14,16 @@ import {
 
 /**
  * One occurrence in a list: who takes it, "Ich übernehme" / "Freigeben".
- * Parents cancel it by tapping the entry.
+ * Every member cancels it by tapping the entry (all members have the same rights).
  */
 export function OccurrenceItem({
   occurrence: o,
   dayLabel,
   myId,
-  isParent,
 }: {
   occurrence: Occurrence;
   dayLabel: string;
   myId: string | undefined;
-  isParent: boolean;
 }) {
   const cancel = useCancelOccurrence();
   const claim = useClaimOccurrence();
@@ -39,7 +37,7 @@ export function OccurrenceItem({
   const assignee = o.assigned_to
     ? o.profiles?.display_name || t.family.unnamedMember
     : t.occurrences.formerMember;
-  const canCancel = isParent && !cancelled;
+  const canCancel = !cancelled;
 
   function confirmRelease() {
     Alert.alert(t.occurrences.releaseTitle(assignee), t.occurrences.releaseText, [
@@ -103,7 +101,7 @@ export function OccurrenceItem({
               onPress={() => release.mutate(o.id)}
             />
           )}
-          {claimed && !mine && isParent && (
+          {claimed && !mine && (
             <Button
               label={t.occurrences.release}
               variant="secondary"
