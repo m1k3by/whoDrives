@@ -9,7 +9,11 @@ import { Body, Button, Loading, Screen, Title } from '@/ui/components';
 import { t } from '@/ui/strings';
 
 // supabase-js already retries network errors itself; one more retry is enough.
-const queryClient = new QueryClient({ defaultOptions: { queries: { retry: 1 } } });
+// Data stays fresh for a minute: switching screens shows it instantly instead of a
+// spinner. Occurrences are kept current by Realtime, mutations invalidate what they change.
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { retry: 1, staleTime: 60_000 } },
+});
 
 const PLAY_STORE_URL =
   'https://play.google.com/store/apps/details?id=com.michael_stoecker.whodrives';

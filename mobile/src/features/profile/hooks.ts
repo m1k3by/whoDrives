@@ -9,15 +9,17 @@ export function useMyProfile() {
   return useQuery({
     queryKey: profileKey,
     queryFn: async () => {
-      const { data: auth } = await supabase.auth.getUser();
-      if (!auth.user) throw new Error('not logged in');
+      // Local session instead of getUser(): no extra round trip to the auth server.
+      // (Only used for display; the database checks the token itself via RLS.)
+      const { data: auth } = await supabase.auth.getSession();
+      if (!auth.session) throw new Error('not logged in');
       const { data, error } = await supabase
         .from('profiles')
         .select('id, display_name')
-        .eq('id', auth.user.id)
+        .eq('id', auth.session.user.id)
         .single();
       if (error) throw error;
-      return { ...data, email: auth.user.email ?? '' };
+      return { ...data, email: auth.session.user.email ?? '' };
     },
   });
 }
@@ -32,8 +34,13 @@ export function useUpdateDisplayName() {
         .eq('id', id);
       if (error) throw error;
     },
-    // The name also shows up in the family member list.
-    onSuccess: () => queryClient.invalidateQueries(),
+    // The name shows up in the profile, the member list and at claimed occurrences.
+    onSuccess: () =>
+      Promise.all(
+        [['my-profile'], ['my-family'], ['occurrences']].map((queryKey) =>
+          queryClient.invalidateQueries({ queryKey }),
+        ),
+      ),
   });
 }
 

@@ -79,3 +79,10 @@ test('next-month arrow switches to November and selects the 1st', async () => {
   expect(await screen.findByText('November 2026')).toBeTruthy();
   expect(onSelect).toHaveBeenCalledWith(new Date(2026, 10, 1));
 });
+
+test('only months near the visible one are rendered (performance)', async () => {
+  await renderCalendar();
+  expect(await screen.findByText('Oktober 2026')).toBeTruthy();
+  // March 2027 is five months ahead: rendering it (and its query) up front made the app slow
+  expect(screen.queryByLabelText('1. März')).toBeNull();
+});

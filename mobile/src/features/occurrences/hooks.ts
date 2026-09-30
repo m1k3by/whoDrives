@@ -49,43 +49,65 @@ export function useLiveOccurrences(familyId: string | undefined) {
 /** Someone else was faster (or it was cancelled in the meantime). */
 export class AlreadyTakenError extends Error {}
 
-export function useClaimOccurrence() {
+/**
+ * Changes an occurrence in every cached list right away (the tap feels instant),
+ * rolls back if the server refuses, and refetches afterwards to get the real state.
+ */
+function useOptimisticOccurrence(
+  call: (occurrenceId: string) => Promise<void>,
+  patch: Partial<Occurrence>,
+) {
   const queryClient = useQueryClient();
+  const key = ['occurrences'];
   return useMutation({
-    mutationFn: async (occurrenceId: string) => {
+    mutationFn: call,
+    onMutate: async (occurrenceId: string) => {
+      await queryClient.cancelQueries({ queryKey: key });
+      const previous = queryClient.getQueriesData<Occurrence[]>({ queryKey: key });
+      queryClient.setQueriesData<Occurrence[]>({ queryKey: key }, (list) =>
+        list?.map((o) => (o.id === occurrenceId ? { ...o, ...patch } : o)),
+      );
+      return { previous };
+    },
+    onError: (_error, _id, context) =>
+      context?.previous.forEach(([queryKey, data]) => queryClient.setQueryData(queryKey, data)),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: key }),
+  });
+}
+
+export function useClaimOccurrence(myId: string | undefined) {
+  return useOptimisticOccurrence(
+    async (occurrenceId) => {
       const { data, error } = await supabase.rpc('claim_occurrence', {
         p_occurrence_id: occurrenceId,
       });
       if (error) throw error;
       if (!data) throw new AlreadyTakenError();
     },
-    // Also after "already taken": show who has it now.
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ['occurrences'] }),
-  });
+    { status: 'claimed', assigned_to: myId ?? null },
+  );
 }
 
 export function useReleaseOccurrence() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (occurrenceId: string) => {
+  return useOptimisticOccurrence(
+    async (occurrenceId) => {
       const { error } = await supabase.rpc('release_occurrence', {
         p_occurrence_id: occurrenceId,
       });
       if (error) throw error;
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ['occurrences'] }),
-  });
+    { status: 'open', assigned_to: null, profiles: null },
+  );
 }
 
 export function useCancelOccurrence() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (occurrenceId: string) => {
+  return useOptimisticOccurrence(
+    async (occurrenceId) => {
       const { error } = await supabase.rpc('cancel_occurrence', {
         p_occurrence_id: occurrenceId,
       });
       if (error) throw error;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['occurrences'] }),
-  });
+    { status: 'cancelled' },
+  );
 }

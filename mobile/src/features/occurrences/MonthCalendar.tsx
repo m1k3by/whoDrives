@@ -1,5 +1,5 @@
-import { useMemo, useRef, useState } from 'react';
-import { FlatList, useWindowDimensions, View } from 'react-native';
+import { memo, useCallback, useMemo, useRef, useState } from 'react';
+import { FlatList, type ListRenderItem, useWindowDimensions, View } from 'react-native';
 
 import { colors } from '@/ui/components';
 
@@ -11,11 +11,11 @@ const MONTHS_BACK = 1;
 const MONTHS_AHEAD = 12; // occurrences are precomputed 12 months ahead
 const SCREEN_PADDING = 24; // horizontal padding of <Screen>
 
+const sameMonth = (a: Date, b: Date) =>
+  a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth();
+
 /** Today if it lies in `month`, otherwise the first of the month. */
-const defaultDay = (month: Date, today: Date) =>
-  month.getFullYear() === today.getFullYear() && month.getMonth() === today.getMonth()
-    ? today
-    : month;
+const defaultDay = (month: Date, today: Date) => (sameMonth(month, today) ? today : month);
 
 /** Swipeable month calendar with dots for days that have occurrences. */
 export function MonthCalendar({
@@ -38,6 +38,23 @@ export function MonthCalendar({
   );
   const [index, setIndex] = useState(MONTHS_BACK);
   const list = useRef<FlatList<Date>>(null);
+
+  const renderMonth: ListRenderItem<Date> = useCallback(
+    ({ item }) => (
+      <View style={{ width: pageWidth }}>
+        <MonthPage
+          month={item}
+          familyId={familyId}
+          today={today}
+          // Only the month that contains the selection gets it, so the other pages
+          // keep equal props and are skipped by memo when another day is tapped.
+          selected={sameMonth(selected, item) ? selected : null}
+          onSelect={onSelect}
+        />
+      </View>
+    ),
+    [pageWidth, familyId, today, selected, onSelect],
+  );
 
   function showMonth(i: number, scroll: boolean) {
     if (i < 0 || i >= months.length || i === index) return;
@@ -67,23 +84,18 @@ export function MonthCalendar({
         onMomentumScrollEnd={(e) =>
           showMonth(Math.round(e.nativeEvent.contentOffset.x / pageWidth), false)
         }
-        renderItem={({ item }) => (
-          <View style={{ width: pageWidth }}>
-            <MonthPage
-              month={item}
-              familyId={familyId}
-              today={today}
-              selected={selected}
-              onSelect={onSelect}
-            />
-          </View>
-        )}
+        renderItem={renderMonth}
+        // Only the visible month and its neighbours: each page has 42 day buttons
+        // and its own query; rendering all 14 months made every tap take seconds.
+        initialNumToRender={1}
+        maxToRenderPerBatch={1}
+        windowSize={3}
       />
     </View>
   );
 }
 
-function MonthPage({
+const MonthPage = memo(function MonthPage({
   month,
   familyId,
   today,
@@ -93,7 +105,7 @@ function MonthPage({
   month: Date;
   familyId: string;
   today: Date;
-  selected: Date;
+  selected: Date | null;
   onSelect: (day: Date) => void;
 }) {
   const occurrences = useOccurrences(familyId, month, addMonths(month, 1));
@@ -115,4 +127,4 @@ function MonthPage({
   return (
     <MonthGrid month={month} today={today} selected={selected} onSelect={onSelect} dots={dots} />
   );
-}
+});

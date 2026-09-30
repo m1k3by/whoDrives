@@ -26,7 +26,7 @@ export function OccurrenceItem({
   myId: string | undefined;
 }) {
   const cancel = useCancelOccurrence();
-  const claim = useClaimOccurrence();
+  const claim = useClaimOccurrence(myId);
   const release = useReleaseOccurrence();
 
   const cancelled = o.status === 'cancelled';

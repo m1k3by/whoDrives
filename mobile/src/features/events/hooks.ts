@@ -57,6 +57,11 @@ export function useCreateEvent() {
       const { error } = await supabase.from('events').insert(event);
       if (error) throw error;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['events'] }),
+    // The database generates the occurrences right away; show them in the calendar too.
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['events'] }),
+        queryClient.invalidateQueries({ queryKey: ['occurrences'] }),
+      ]),
   });
 }
