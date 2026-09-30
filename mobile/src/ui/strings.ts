@@ -209,6 +209,23 @@ export const t = {
     hourA11y: (h: number) => `${h} Uhr`,
     minuteA11y: (m: number) => `${m} Minuten`,
   },
+  header: {
+    menu: 'Menü öffnen',
+    search: 'Suchen',
+    today: 'Heute',
+    toggleCalendar: (expanded: boolean) =>
+      expanded ? 'Kalender einklappen' : 'Kalender ausklappen',
+  },
+  menu: {
+    title: 'Menü',
+  },
+  search: {
+    title: 'Suchen',
+    placeholder: 'Termin, Kind, Ort oder Person',
+    hint: 'Durchsucht alle Termine der nächsten 12 Monate.',
+    none: 'Nichts gefunden.',
+    more: (n: number) => `… und ${n} weitere. Bitte genauer suchen.`,
+  },
   familyScreen: {
     title: 'Familie',
   },

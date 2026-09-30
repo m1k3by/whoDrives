@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, Text } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useCreateFamily, useMyFamily } from '@/features/family/hooks';
 import { InvalidInviteError, useRedeemInvite } from '@/features/invites/hooks';
@@ -19,6 +20,7 @@ export default function HomeScreen() {
   const profile = useMyProfile();
   const family = useMyFamily();
   const [selected, setSelected] = useState(startOfToday);
+  const [calendarOpen, setCalendarOpen] = useState(true);
   // One live subscription for all occurrence lists while the family is shown
   useLiveOccurrences(family.data?.id);
   usePushRegistration(!!family.data);
@@ -50,26 +52,76 @@ export default function HomeScreen() {
   }
   if (!family.data) return <CreateFamily />;
 
+  // Fixed header and calendar on top, only the day list scrolls.
   return (
-    <Screen>
-      <Title>{family.data.name}</Title>
-      <MonthCalendar familyId={family.data.id} selected={selected} onSelect={setSelected} />
-      <Text style={styles.heading}>{dayLabel(selected, new Date())}</Text>
-      <DayList familyId={family.data.id} day={selected} myId={profile.data.id} />
-      <Button label={t.calendar.upcoming} onPress={() => router.push('/upcoming')} />
-      <Button label={t.events.title} variant="secondary" onPress={() => router.push('/events')} />
-      <Button
-        label={t.children.title}
-        variant="secondary"
-        onPress={() => router.push('/children')}
+    <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
+      <HomeHeader
+        month={selected}
+        expanded={calendarOpen}
+        onToggle={() => setCalendarOpen((open) => !open)}
+        onToday={() => setSelected(startOfToday())}
       />
-      <Button
-        label={t.familyScreen.title}
-        variant="secondary"
-        onPress={() => router.push('/family')}
-      />
-      <ProfileButton />
-    </Screen>
+      {calendarOpen && (
+        <MonthCalendar familyId={family.data.id} selected={selected} onSelect={setSelected} />
+      )}
+      <ScrollView contentContainerStyle={styles.dayList}>
+        <Text style={styles.heading}>{dayLabel(selected, new Date())}</Text>
+        <DayList familyId={family.data.id} day={selected} myId={profile.data.id} />
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+/** Always visible: menu, month (tap to collapse/expand the calendar), search, today. */
+function HomeHeader({
+  month,
+  expanded,
+  onToggle,
+  onToday,
+}: {
+  month: Date;
+  expanded: boolean;
+  onToggle: () => void;
+  onToday: () => void;
+}) {
+  return (
+    <View style={styles.header}>
+      <HeaderButton label="☰" a11y={t.header.menu} onPress={() => router.push('/menu')} />
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t.header.toggleCalendar(expanded)}
+        accessibilityState={{ expanded }}
+        onPress={onToggle}
+        style={styles.monthButton}
+      >
+        <Text style={styles.monthLabel} numberOfLines={1}>
+          {t.calendar.months[month.getMonth()]} {month.getFullYear()} {expanded ? '▴' : '▾'}
+        </Text>
+      </Pressable>
+      <HeaderButton label="🔍" a11y={t.header.search} onPress={() => router.push('/search')} />
+      <HeaderButton label={t.header.today} a11y={t.header.today} onPress={onToday} />
+    </View>
+  );
+}
+
+function HeaderButton({
+  label,
+  a11y,
+  onPress,
+}: {
+  label: string;
+  a11y: string;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={a11y}
+      onPress={onPress}
+      style={({ pressed }) => [styles.headerButton, pressed && styles.pressed]}
+    >
+      <Text style={styles.headerButtonLabel}>{label}</Text>
+    </Pressable>
   );
 }
 
@@ -161,5 +213,28 @@ function ProfileButton() {
 }
 
 const styles = StyleSheet.create({
+  safe: { flex: 1, backgroundColor: colors.background },
   heading: { fontSize: 24, fontWeight: '700', color: colors.text },
+  dayList: { padding: 24, gap: 16 },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  monthButton: { flex: 1, minHeight: 52, justifyContent: 'center', paddingHorizontal: 8 },
+  monthLabel: { fontSize: 22, fontWeight: '700', color: colors.text },
+  headerButton: {
+    minWidth: 52,
+    minHeight: 52,
+    paddingHorizontal: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 26,
+  },
+  headerButtonLabel: { fontSize: 22, fontWeight: '700', color: colors.primary },
+  pressed: { opacity: 0.6 },
 });

@@ -1,23 +1,27 @@
-import { memo, useCallback, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FlatList, type ListRenderItem, useWindowDimensions, View } from 'react-native';
 
 import { colors } from '@/ui/components';
 
 import { useOccurrences } from './hooks';
 import { addMonths, dayKey, startOfToday } from './month';
-import { MonthGrid, MonthHeader } from './MonthGrid';
+import { MonthGrid, WeekdayRow } from './MonthGrid';
 
 const MONTHS_BACK = 1;
 const MONTHS_AHEAD = 12; // occurrences are precomputed 12 months ahead
-const SCREEN_PADDING = 24; // horizontal padding of <Screen>
+const SIDE_PADDING = 24; // horizontal padding around the calendar
 
-const sameMonth = (a: Date, b: Date) =>
+export const sameMonth = (a: Date, b: Date) =>
   a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth();
 
 /** Today if it lies in `month`, otherwise the first of the month. */
 const defaultDay = (month: Date, today: Date) => (sameMonth(month, today) ? today : month);
 
-/** Swipeable month calendar with dots for days that have occurrences. */
+/**
+ * Swipeable month calendar with dots for days that have occurrences.
+ * Always shows the month of `selected`: swiping selects a day in the new month,
+ * and when `selected` jumps elsewhere (e.g. "Heute"), the calendar scrolls there.
+ */
 export function MonthCalendar({
   familyId,
   selected,
@@ -27,7 +31,7 @@ export function MonthCalendar({
   selected: Date;
   onSelect: (day: Date) => void;
 }) {
-  const pageWidth = useWindowDimensions().width - 2 * SCREEN_PADDING;
+  const pageWidth = useWindowDimensions().width - 2 * SIDE_PADDING;
   const [today] = useState(startOfToday);
   const months = useMemo(
     () =>
@@ -36,8 +40,19 @@ export function MonthCalendar({
       ),
     [today],
   );
-  const [index, setIndex] = useState(MONTHS_BACK);
+  const index = Math.max(
+    0,
+    months.findIndex((m) => sameMonth(m, selected)),
+  );
   const list = useRef<FlatList<Date>>(null);
+  const shownIndex = useRef(index);
+
+  // Selection moved to another month from outside (e.g. "Heute"): scroll there.
+  useEffect(() => {
+    if (shownIndex.current === index) return;
+    shownIndex.current = index;
+    list.current?.scrollToIndex({ index });
+  }, [index]);
 
   const renderMonth: ListRenderItem<Date> = useCallback(
     ({ item }) => (
@@ -56,22 +71,16 @@ export function MonthCalendar({
     [pageWidth, familyId, today, selected, onSelect],
   );
 
-  function showMonth(i: number, scroll: boolean) {
-    if (i < 0 || i >= months.length || i === index) return;
-    if (scroll) list.current?.scrollToIndex({ index: i });
-    setIndex(i);
+  // Swiped to another month: select a day there (today if it is this month).
+  function onSwiped(i: number) {
+    if (i < 0 || i >= months.length || i === shownIndex.current) return;
+    shownIndex.current = i;
     onSelect(defaultDay(months[i], today));
   }
 
   return (
-    <View>
-      <MonthHeader
-        month={months[index]}
-        onPrevious={() => showMonth(index - 1, true)}
-        onNext={() => showMonth(index + 1, true)}
-        previousDisabled={index === 0}
-        nextDisabled={index === months.length - 1}
-      />
+    <View style={{ paddingHorizontal: SIDE_PADDING }}>
+      <WeekdayRow />
       <FlatList
         ref={list}
         horizontal
@@ -79,11 +88,9 @@ export function MonthCalendar({
         showsHorizontalScrollIndicator={false}
         data={months}
         keyExtractor={dayKey}
-        initialScrollIndex={MONTHS_BACK}
+        initialScrollIndex={index}
         getItemLayout={(_, i) => ({ length: pageWidth, offset: pageWidth * i, index: i })}
-        onMomentumScrollEnd={(e) =>
-          showMonth(Math.round(e.nativeEvent.contentOffset.x / pageWidth), false)
-        }
+        onMomentumScrollEnd={(e) => onSwiped(Math.round(e.nativeEvent.contentOffset.x / pageWidth))}
         renderItem={renderMonth}
         // Only the visible month and its neighbours: each page has 42 day buttons
         // and its own query; rendering all 14 months made every tap take seconds.

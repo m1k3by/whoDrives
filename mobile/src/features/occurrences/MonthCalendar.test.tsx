@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen } from '@testing-library/react-native';
+import { FlatList } from 'react-native';
 
 import { MonthCalendar } from './MonthCalendar';
 
@@ -43,19 +44,23 @@ beforeAll(() => {
 });
 afterAll(() => jest.useRealTimers());
 
+function calendar(selected: Date, onSelect: (d: Date) => void, client: QueryClient) {
+  return (
+    <QueryClientProvider client={client}>
+      <MonthCalendar familyId="fam" selected={selected} onSelect={onSelect} />
+    </QueryClientProvider>
+  );
+}
+
 async function renderCalendar(onSelect = jest.fn()) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  await render(
-    <QueryClientProvider client={client}>
-      <MonthCalendar familyId="fam" selected={new Date(2026, 9, 5)} onSelect={onSelect} />
-    </QueryClientProvider>,
-  );
+  await render(calendar(new Date(2026, 9, 5), onSelect, client));
   return onSelect;
 }
 
-test('shows the current month with German labels', async () => {
+test('shows the month of the selected day with German weekdays', async () => {
   await renderCalendar();
-  expect(await screen.findByText('Oktober 2026')).toBeTruthy();
+  expect(await screen.findByLabelText('5. Oktober')).toBeTruthy();
   expect(screen.getByText('Mo')).toBeTruthy();
   expect(screen.getByText('So')).toBeTruthy();
 });
@@ -73,16 +78,24 @@ test('tapping a day selects it', async () => {
   expect(onSelect).toHaveBeenCalledWith(new Date(2026, 9, 14));
 });
 
-test('next-month arrow switches to November and selects the 1st', async () => {
-  const onSelect = await renderCalendar();
-  await fireEvent.press(await screen.findByLabelText('Nächster Monat'));
-  expect(await screen.findByText('November 2026')).toBeTruthy();
-  expect(onSelect).toHaveBeenCalledWith(new Date(2026, 10, 1));
+test('follows the selection when it jumps to another month (e.g. "Heute")', async () => {
+  const scroll = jest.spyOn(FlatList.prototype, 'scrollToIndex').mockImplementation(() => {});
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const onSelect = jest.fn();
+  const { rerender } = await render(calendar(new Date(2026, 9, 5), onSelect, client));
+  expect(scroll).not.toHaveBeenCalled();
+
+  // months: Sep 2026 (0), Oct (1), Nov, Dec, Jan 2027 (4)
+  await rerender(calendar(new Date(2027, 0, 12), onSelect, client));
+  expect(scroll).toHaveBeenCalledWith({ index: 4 });
+  // the parent chose the day itself; the calendar must not overwrite it
+  expect(onSelect).not.toHaveBeenCalled();
+  scroll.mockRestore();
 });
 
 test('only months near the visible one are rendered (performance)', async () => {
   await renderCalendar();
-  expect(await screen.findByText('Oktober 2026')).toBeTruthy();
+  expect(await screen.findByLabelText('5. Oktober')).toBeTruthy();
   // March 2027 is five months ahead: rendering it (and its query) up front made the app slow
   expect(screen.queryByLabelText('1. März')).toBeNull();
 });

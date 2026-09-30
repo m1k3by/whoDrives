@@ -64,6 +64,8 @@ function Gate() {
             ['children', t.children.title],
             ['family', t.familyScreen.title],
             ['upcoming', t.calendar.upcoming],
+            ['menu', t.menu.title],
+            ['search', t.search.title],
           ] as const
         ).map(([name, title]) => (
           <Stack.Screen

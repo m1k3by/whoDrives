@@ -34,14 +34,20 @@ export function MonthHeader({
         </Text>
         <ArrowButton label="›" a11y={t.calendar.next} disabled={nextDisabled} onPress={onNext} />
       </View>
-      <View style={styles.week}>
-        {t.calendar.weekdaysShort.map((d) => (
-          <Text key={d} style={styles.weekday}>
-            {d}
-          </Text>
-        ))}
-      </View>
+      <WeekdayRow />
     </>
+  );
+}
+
+export function WeekdayRow() {
+  return (
+    <View style={styles.week}>
+      {t.calendar.weekdaysShort.map((d) => (
+        <Text key={d} style={styles.weekday}>
+          {d}
+        </Text>
+      ))}
+    </View>
   );
 }
 
