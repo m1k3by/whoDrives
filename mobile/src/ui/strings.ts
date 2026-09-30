@@ -75,13 +75,15 @@ export const t = {
     create: 'Code erstellen',
     codeIntro: (role: string) => `Einladungscode (${role}):`,
     validUntil: (date: string) => `Gilt bis ${date} und nur für eine Person.`,
-    share: 'Code teilen',
+    share: 'Einladung teilen',
     another: 'Weiteren Code erstellen',
     openTitle: 'Offene Einladungen',
     revoke: 'Zurückziehen',
-    shareMessage: (family: string, code: string, date: string) =>
-      `Du bist bei „Who Drives?“ in „${family}“ eingeladen. ` +
-      `Öffne die App, melde dich an und gib diesen Code ein: ${code} (gültig bis ${date}).`,
+    shareMessage: (family: string, code: string, date: string, link: string) =>
+      `Du bist bei „Who Drives?“ in „${family}“ eingeladen.\n\n` +
+      `1. App installieren: ${link}\n` +
+      `2. App öffnen, anmelden und diesen Einladungscode eingeben: ${code}\n\n` +
+      `Der Code gilt bis ${date} und nur für dich.`,
   },
   children: {
     title: 'Kinder',

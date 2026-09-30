@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Share, Text } from 'react-native';
 
 import { formatInviteCode, useCreateInvite, type FamilyRole } from '@/features/invites/hooks';
+import { inviteLink } from '@/lib/links';
 import { Body, Button, Screen } from '@/ui/components';
 import { t } from '@/ui/strings';
 import { makeStyles } from '@/ui/theme';
@@ -28,7 +29,14 @@ export default function InviteScreen() {
         <Button
           label={t.invite.share}
           onPress={() =>
-            Share.share({ message: t.invite.shareMessage(familyName, code, validUntil) })
+            Share.share({
+              message: t.invite.shareMessage(
+                familyName,
+                code,
+                validUntil,
+                inviteLink(invite.data.code),
+              ),
+            })
           }
         />
         <Button label={t.invite.another} variant="secondary" onPress={() => invite.reset()} />
