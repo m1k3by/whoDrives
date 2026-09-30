@@ -275,7 +275,7 @@ Nach Step 0 folgt ein Feature pro Step, jeweils als eigener PR und eigenes Relea
 | 3 Kinder und Regeln | children, events; Termine einmalig oder wöchentlich anlegen | „Reiten, jeden Di 15 Uhr“ ist angelegt; fremde Familien können nichts ändern |
 | 4 Termine | occurrences, pg_cron-Job, Monatskalender mit Tagesliste, Liste „nächste 14 Tage“, einzelnen Termin absagen | 12 Monate vorberechnet; Termine stimmen über die Zeitumstellung hinweg |
 | 5 Übernehmen | claim_occurrence, release_occurrence, Status mit Namen, Realtime | Zwei Handys tippen gleichzeitig: nur eins bekommt den Termin, das andere aktualisiert live |
-| 6 Push | push_tokens, Function notify, FCM über Expo | Push bei neuem Termin, Übernahme, Freigabe, Absage (an alle außer dem Auslöser), am Vorabend ab 18 Uhr für offene Termine und 1 Stunde vorher an die eingetragene Person; Texte mit Uhrzeit von–bis, Ort und Namen |
+| 6 Push | push_tokens, Function notify, FCM über Expo | Push bei neuem Termin, Übernahme, Freigabe, Absage (an alle außer dem Auslöser); Erinnerungen 3 Tage vorher (nur offene, an alle), 1 Tag und 1 Stunde vorher (offen: an alle, übernommen: an die eingetragene Person), Zeiten vorerst fest (Entscheidung 30.09.2026); Texte mit Uhrzeit von–bis, Ort und Namen |
 | 7 Übersicht | Filter: meine Termine, offene Termine, alle | Jeder sieht auf einen Blick, wer diese Woche was macht |
 | 8 Store-Reife | Konto löschen in der App und per Web-Link, Datenschutzerklärung, Data-Safety-Angaben | Voraussetzungen für Closed Testing und öffentliches Release erfüllt |
 

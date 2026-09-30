@@ -1,5 +1,5 @@
 begin;
-select plan(23);
+select plan(16);
 
 -- Family A: parent p (Mama), grandparent g (Oma), other o. Family B: parent x.
 insert into auth.users (id, email) values
@@ -61,28 +61,11 @@ select results_eq(
   'new event: all members except the creator, with time range, place and creator');
 delete from public.notification_outbox;
 
--- one concrete occurrence far in the future for the time-based checks
+-- one concrete occurrence far in the future (scheduled messages: reminders.test.sql)
 select public.generate_occurrences_for('e7000000-0000-0000-0000-000000000000', '2030-06-01', '2030-06-08');
 create temp table occ as
   select id from public.occurrences where event_id = 'e7000000-0000-0000-0000-000000000000';
 grant select on occ to authenticated;
-
--- Evening before (tomorrow = Tue 2030-06-04, local Berlin time) -----------------------------
-select public.enqueue_scheduled_notifications('2030-06-03 17:59:00 Europe/Berlin');
-select is((select count(*)::int from outbox_a), 0, 'no evening message before 18:00');
-
-select public.enqueue_scheduled_notifications('2030-06-03 18:00:00 Europe/Berlin');
-select results_eq(
-  $$select user_id, title, body from outbox_a order by user_id$$,
-  $$values ('00000000-0000-0000-0000-0000000000a7'::uuid, 'Morgen noch offen – wer übernimmt?', 'Reiten (Lena), Di 04.06., 15:00–16:00 Uhr, Reitstall Sonnenhof'),
-           ('00000000-0000-0000-0000-0000000000e7'::uuid, 'Morgen noch offen – wer übernimmt?', 'Reiten (Lena), Di 04.06., 15:00–16:00 Uhr, Reitstall Sonnenhof'),
-           ('00000000-0000-0000-0000-0000000000f7'::uuid, 'Morgen noch offen – wer übernimmt?', 'Reiten (Lena), Di 04.06., 15:00–16:00 Uhr, Reitstall Sonnenhof')$$,
-  'from 18:00 the evening before: all members get the open occurrence');
-
-select public.enqueue_scheduled_notifications('2030-06-03 18:05:00 Europe/Berlin');
-select public.enqueue_scheduled_notifications('2030-06-03 21:00:00 Europe/Berlin');
-select is((select count(*)::int from outbox_a), 3, 'later job runs do not repeat the evening message');
-delete from public.notification_outbox;
 
 -- Claim -> all members except the claimer ---------------------------------------------------
 set local role authenticated;
@@ -96,22 +79,6 @@ select results_eq(
   'claim: all other members are notified, not the one who claimed');
 delete from public.notification_outbox;
 
-select public.enqueue_scheduled_notifications('2030-06-04 18:00:00 Europe/Berlin');
-select is((select count(*)::int from outbox_a where title like 'Morgen%'), 0,
-  'claimed occurrences get no evening message');
-
--- Reminder one hour before -> assigned person ------------------------------------------------
-select public.enqueue_scheduled_notifications('2030-06-04 13:55:00 Europe/Berlin');
-select is((select count(*)::int from outbox_a), 0, 'no reminder earlier than one hour before');
-select public.enqueue_scheduled_notifications('2030-06-04 14:00:00 Europe/Berlin');
-select public.enqueue_scheduled_notifications('2030-06-04 14:05:00 Europe/Berlin');
-select results_eq(
-  $$select user_id, title, body from outbox_a$$,
-  $$values ('00000000-0000-0000-0000-0000000000f7'::uuid, 'Gleich geht''s los', 'Reiten (Lena), Di 04.06., 15:00–16:00 Uhr, Reitstall Sonnenhof')$$,
-  'one hour before: exactly one reminder for the assigned person');
-select public.enqueue_scheduled_notifications('2030-06-04 15:01:00 Europe/Berlin');
-select is((select count(*)::int from outbox_a), 1, 'no reminder after the start');
-delete from public.notification_outbox;
 
 -- Release -> all others ---------------------------------------------------------------------
 set local role authenticated;
