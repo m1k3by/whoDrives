@@ -1,6 +1,8 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FlatList, type ListRenderItem, useWindowDimensions, View } from 'react-native';
 
+import { useColors } from '@/ui/theme';
+
 import { useOccurrences } from './hooks';
 import { addMonths, dayKey, startOfToday } from './month';
 import { MonthGrid, WeekdayRow } from './MonthGrid';
@@ -8,7 +10,9 @@ import { dayTones, occurrenceTone, type Tone } from './tone';
 
 const MONTHS_BACK = 1;
 const MONTHS_AHEAD = 12; // occurrences are precomputed 12 months ahead
-const SIDE_PADDING = 24; // horizontal padding around the calendar
+const CARD_MARGIN = 12; // calendar card to screen edge
+const CARD_PADDING = 12; // inside the card
+const SIDE_PADDING = CARD_MARGIN + CARD_PADDING;
 
 export const sameMonth = (a: Date, b: Date) =>
   a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth();
@@ -30,6 +34,7 @@ export function MonthCalendar({
   selected: Date;
   onSelect: (day: Date) => void;
 }) {
+  const c = useColors();
   const pageWidth = useWindowDimensions().width - 2 * SIDE_PADDING;
   const [today] = useState(startOfToday);
   const months = useMemo(
@@ -78,7 +83,15 @@ export function MonthCalendar({
   }
 
   return (
-    <View style={{ paddingHorizontal: SIDE_PADDING }}>
+    <View
+      style={{
+        marginHorizontal: CARD_MARGIN,
+        paddingHorizontal: CARD_PADDING,
+        paddingBottom: 4,
+        borderRadius: 20,
+        backgroundColor: c.surface,
+      }}
+    >
       <WeekdayRow />
       <FlatList
         ref={list}

@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { type ReactNode, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useCreateFamily, useMyFamily } from '@/features/family/hooks';
@@ -13,11 +13,13 @@ import { OccurrenceItem } from '@/features/occurrences/OccurrenceItem';
 import { NameForm } from '@/features/profile/NameForm';
 import { useMyProfile } from '@/features/profile/hooks';
 import { usePushRegistration } from '@/features/push/register';
-import { Body, Button, colors, Field, Loading, Screen, Title } from '@/ui/components';
+import { Body, Button, Field, Loading, Screen, Title } from '@/ui/components';
 import { MenuIcon, SearchIcon } from '@/ui/icons';
 import { t } from '@/ui/strings';
+import { makeStyles } from '@/ui/theme';
 
 export default function HomeScreen() {
+  const styles = useStyles();
   const profile = useMyProfile();
   const family = useMyFamily();
   const [selected, setSelected] = useState(startOfToday);
@@ -93,6 +95,7 @@ function HomeHeader({
   onToggle: () => void;
   onToday: () => void;
 }) {
+  const styles = useStyles();
   return (
     <View style={styles.header}>
       <HeaderButton a11y={t.header.menu} onPress={() => router.push('/menu')}>
@@ -128,6 +131,7 @@ function HeaderButton({
   onPress: () => void;
   children: ReactNode;
 }) {
+  const styles = useStyles();
   return (
     <Pressable
       accessibilityRole="button"
@@ -169,6 +173,7 @@ function DayList({ familyId, day, myId }: { familyId: string; day: Date; myId: s
 
 // New user without family: join with an invite code, or create a family.
 function CreateFamily() {
+  const styles = useStyles();
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
   const create = useCreateFamily();
@@ -227,9 +232,9 @@ function ProfileButton() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  heading: { fontSize: 24, fontWeight: '700', color: colors.text },
+const useStyles = makeStyles((c) => ({
+  safe: { flex: 1, backgroundColor: c.background },
+  heading: { fontSize: 24, fontWeight: '700', color: c.text },
   // bottom padding keeps the last entry clear of the + button
   dayList: { padding: 24, paddingBottom: 120, gap: 16 },
   fab: {
@@ -238,24 +243,22 @@ const styles = StyleSheet.create({
     bottom: 28,
     width: 68,
     height: 68,
-    borderRadius: 34,
-    backgroundColor: colors.primary,
+    borderRadius: 22,
+    backgroundColor: c.primary,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 4,
   },
-  fabLabel: { fontSize: 40, lineHeight: 44, color: colors.onPrimary, fontWeight: '400' },
+  fabLabel: { fontSize: 40, lineHeight: 44, color: c.onPrimary, fontWeight: '400' },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
     paddingHorizontal: 8,
     paddingVertical: 6,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
   },
   monthButton: { flex: 1, minHeight: 52, justifyContent: 'center', paddingHorizontal: 8 },
-  monthLabel: { fontSize: 22, fontWeight: '700', color: colors.text },
+  monthLabel: { fontSize: 22, fontWeight: '700', color: c.text },
   headerButton: {
     minWidth: 52,
     minHeight: 52,
@@ -264,6 +267,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 26,
   },
-  headerButtonLabel: { fontSize: 22, fontWeight: '700', color: colors.primary },
+  headerButtonLabel: { fontSize: 22, fontWeight: '700', color: c.primary },
   pressed: { opacity: 0.6 },
-});
+}));

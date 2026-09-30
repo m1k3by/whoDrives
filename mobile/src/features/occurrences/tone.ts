@@ -1,4 +1,4 @@
-import { colors } from '@/ui/components';
+import type { Palette } from '@/ui/theme';
 
 /**
  * open:      nobody takes it yet and it is still ahead -> action needed (red)
@@ -14,12 +14,12 @@ export function occurrenceTone(o: { status: string; ends_at: string }, now: Date
   return new Date(o.ends_at) > now ? 'open' : 'missed';
 }
 
-export const toneColor: Record<Tone, string> = {
-  open: colors.open,
-  covered: colors.covered,
-  cancelled: colors.border,
-  missed: colors.border,
-};
+/** Color of a tone in the current theme */
+export function toneColor(c: Palette, tone: Tone): string {
+  if (tone === 'open') return c.open;
+  if (tone === 'covered') return c.covered;
+  return c.border;
+}
 
 /** Dots for one calendar day: open ones first (they need someone), cancelled ones left out. */
 export function dayTones(tones: Tone[]): Tone[] {

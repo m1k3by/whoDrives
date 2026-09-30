@@ -1,6 +1,6 @@
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, Text, View } from 'react-native';
 
-import { Button, colors } from '@/ui/components';
+import { Button } from '@/ui/components';
 import { t } from '@/ui/strings';
 
 import { timeLabel } from './days';
@@ -12,6 +12,7 @@ import {
   useReleaseOccurrence,
   type Occurrence,
 } from './hooks';
+import { makeStyles, useColors } from '@/ui/theme';
 
 /**
  * One occurrence in a list: who takes it, "Ich übernehme" / "Freigeben".
@@ -26,6 +27,8 @@ export function OccurrenceItem({
   dayLabel: string;
   myId: string | undefined;
 }) {
+  const styles = useStyles();
+  const c = useColors();
   const cancel = useCancelOccurrence();
   const claim = useClaimOccurrence(myId);
   const release = useReleaseOccurrence();
@@ -62,7 +65,7 @@ export function OccurrenceItem({
       style={[
         styles.item,
         // red = still open (someone has to act), green = somebody takes it
-        { borderLeftColor: toneColor[tone] },
+        { borderLeftColor: toneColor(c, tone) },
         cancelled && styles.cancelled,
       ]}
     >
@@ -83,7 +86,7 @@ export function OccurrenceItem({
       </Text>
 
       {!cancelled && (
-        <Text style={[styles.status, { color: toneColor[tone] }]}>
+        <Text style={[styles.status, { color: toneColor(c, tone) }]}>
           {!claimed
             ? t.occurrences.open
             : mine
@@ -130,15 +133,24 @@ export function OccurrenceItem({
   );
 }
 
-const styles = StyleSheet.create({
-  item: { borderLeftWidth: 8, paddingLeft: 14, paddingVertical: 8, gap: 4 },
+const useStyles = makeStyles((c) => ({
+  // card on the grey background; the colored left edge shows the status
+  item: {
+    backgroundColor: c.surface,
+    borderRadius: 14,
+    borderLeftWidth: 6,
+    paddingLeft: 14,
+    paddingRight: 12,
+    paddingVertical: 12,
+    gap: 4,
+  },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   childDot: { width: 14, height: 14, borderRadius: 7 },
   cancelled: { opacity: 0.55 },
   strike: { textDecorationLine: 'line-through' },
-  title: { fontSize: 22, fontWeight: '600', color: colors.text },
-  line: { fontSize: 18, color: colors.muted },
+  title: { fontSize: 22, fontWeight: '600', color: c.text },
+  line: { fontSize: 18, color: c.muted },
   status: { fontSize: 20, fontWeight: '700' },
   actions: { gap: 8, marginTop: 4 },
-  error: { fontSize: 18, color: colors.error },
-});
+  error: { fontSize: 18, color: c.error },
+}));

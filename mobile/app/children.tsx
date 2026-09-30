@@ -1,14 +1,16 @@
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
 import { useChildren, useCreateChild } from '@/features/events/hooks';
 import { useMyMembership } from '@/features/family/hooks';
-import { Body, Button, colors, Field, Loading, Screen } from '@/ui/components';
+import { Body, Button, Field, Loading, Screen } from '@/ui/components';
 import { t } from '@/ui/strings';
+import { makeStyles } from '@/ui/theme';
 
 const PALETTE = Object.keys(t.children.colors) as (keyof typeof t.children.colors)[];
 
 export default function ChildrenScreen() {
+  const styles = useStyles();
   const { family } = useMyMembership();
   const children = useChildren(family?.id);
 
@@ -35,6 +37,7 @@ export default function ChildrenScreen() {
 }
 
 function AddChild({ familyId }: { familyId: string }) {
+  const styles = useStyles();
   const [name, setName] = useState('');
   const [color, setColor] = useState<string>(PALETTE[0]);
   const [invalid, setInvalid] = useState(false);
@@ -73,20 +76,20 @@ function AddChild({ familyId }: { familyId: string }) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    borderBottomColor: c.border,
   },
   dot: { width: 28, height: 28, borderRadius: 14 },
-  name: { fontSize: 22, color: colors.text },
-  heading: { fontSize: 24, fontWeight: '700', color: colors.text, marginTop: 12 },
-  label: { fontSize: 20, fontWeight: '600', color: colors.text },
+  name: { fontSize: 22, color: c.text },
+  heading: { fontSize: 24, fontWeight: '700', color: c.text, marginTop: 12 },
+  label: { fontSize: 20, fontWeight: '600', color: c.text },
   palette: { flexDirection: 'row', flexWrap: 'wrap', gap: 16 },
   swatch: { width: 52, height: 52, borderRadius: 26 },
-  selected: { borderWidth: 5, borderColor: colors.text },
-});
+  selected: { borderWidth: 5, borderColor: c.text },
+}));

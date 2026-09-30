@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
 import { DateField } from '@/features/events/DateField';
 import {
@@ -13,8 +13,9 @@ import { useChildren, useCreateEvent } from '@/features/events/hooks';
 import { TimeField } from '@/features/events/TimeField';
 import { useMyMembership } from '@/features/family/hooks';
 import { fromDayKey } from '@/features/occurrences/month';
-import { Body, Button, Chip, ChipGrid, colors, Field, Screen } from '@/ui/components';
+import { Body, Button, Chip, ChipGrid, Field, Screen } from '@/ui/components';
 import { t } from '@/ui/strings';
+import { makeStyles } from '@/ui/theme';
 
 const KINDS = Object.keys(t.events.kinds) as EventKind[];
 const DURATIONS = Object.keys(t.events.durations).map(
@@ -22,6 +23,7 @@ const DURATIONS = Object.keys(t.events.durations).map(
 ) as (keyof typeof t.events.durations)[];
 
 export default function NewEventScreen() {
+  const styles = useStyles();
   const { family } = useMyMembership();
   // Opened from the calendar's + button: start with the day selected there
   const { date } = useLocalSearchParams<{ date?: string }>();
@@ -146,8 +148,8 @@ export default function NewEventScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  label: { fontSize: 20, fontWeight: '600', color: colors.text },
+const useStyles = makeStyles((c) => ({
+  label: { fontSize: 20, fontWeight: '600', color: c.text },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   half: { flexGrow: 1, flexBasis: '45%' },
-});
+}));

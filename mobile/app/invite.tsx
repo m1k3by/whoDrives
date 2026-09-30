@@ -1,14 +1,16 @@
 import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Share, StyleSheet, Text } from 'react-native';
+import { Share, Text } from 'react-native';
 
 import { formatInviteCode, useCreateInvite, type FamilyRole } from '@/features/invites/hooks';
-import { Body, Button, colors, Screen } from '@/ui/components';
+import { Body, Button, Screen } from '@/ui/components';
 import { t } from '@/ui/strings';
+import { makeStyles } from '@/ui/theme';
 
 const ROLES: FamilyRole[] = ['grandparent', 'parent', 'other'];
 
 export default function InviteScreen() {
+  const styles = useStyles();
   const { familyId, familyName } = useLocalSearchParams<{ familyId: string; familyName: string }>();
   const [role, setRole] = useState<FamilyRole>('grandparent');
   const invite = useCreateInvite();
@@ -56,13 +58,13 @@ export default function InviteScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   code: {
     fontSize: 44,
     fontWeight: '700',
     letterSpacing: 4,
     textAlign: 'center',
-    color: colors.text,
+    color: c.text,
     paddingVertical: 12,
   },
-});
+}));

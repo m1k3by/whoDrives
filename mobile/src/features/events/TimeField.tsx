@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { StyleSheet, Text } from 'react-native';
+import { Text } from 'react-native';
 
-import { Button, Chip, ChipGrid, colors } from '@/ui/components';
+import { Button, Chip, ChipGrid } from '@/ui/components';
 import { t } from '@/ui/strings';
 
 import { PickerField } from './PickerField';
+import { makeStyles } from '@/ui/theme';
 
 const HOURS = Array.from({ length: 24 }, (_, h) => h);
 const MINUTES = Array.from({ length: 12 }, (_, i) => i * 5);
@@ -23,6 +24,7 @@ export function TimeField({
   value: string;
   onChange: (value: string) => void;
 }) {
+  const styles = useStyles();
   const [open, setOpen] = useState(false);
   const [hour, setHour] = useState<number | null>(null);
   const [minute, setMinute] = useState<number | null>(null);
@@ -88,8 +90,8 @@ export function TimeField({
   );
 }
 
-const styles = StyleSheet.create({
-  preview: { fontSize: 36, fontWeight: '700', textAlign: 'center', color: colors.text },
-  section: { fontSize: 18, fontWeight: '700', color: colors.muted },
-  hint: { fontSize: 18, color: colors.muted, textAlign: 'center' },
-});
+const useStyles = makeStyles((c) => ({
+  preview: { fontSize: 36, fontWeight: '700', textAlign: 'center', color: c.text },
+  section: { fontSize: 18, fontWeight: '700', color: c.muted },
+  hint: { fontSize: 18, color: c.muted, textAlign: 'center' },
+}));

@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
-
-import { colors } from '@/ui/components';
+import { Modal, Pressable, Text, View } from 'react-native';
+import { makeStyles } from '@/ui/theme';
 
 /**
  * Looks like a text field, but opens a popup to choose the value (date, time).
@@ -28,6 +27,7 @@ export function PickerField({
   /** Shown below the field, e.g. a "remove" button */
   footer?: ReactNode;
 }) {
+  const styles = useStyles();
   return (
     <View style={styles.field}>
       <Text style={styles.label}>{label}</Text>
@@ -53,24 +53,25 @@ export function PickerField({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   field: { gap: 8 },
-  label: { fontSize: 20, fontWeight: '600', color: colors.text },
+  label: { fontSize: 20, fontWeight: '600', color: c.text },
   input: {
     minHeight: 60,
-    borderWidth: 2,
-    borderColor: colors.border,
-    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: c.border,
+    backgroundColor: c.surface,
+    borderRadius: 14,
     paddingHorizontal: 16,
     justifyContent: 'center',
   },
-  value: { fontSize: 22, color: colors.text },
-  placeholder: { color: colors.muted },
+  value: { fontSize: 22, color: c.text },
+  placeholder: { color: c.muted },
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: c.backdrop,
     justifyContent: 'center',
     padding: 12,
   },
-  sheet: { backgroundColor: colors.background, borderRadius: 16, padding: 16, gap: 12 },
-});
+  sheet: { backgroundColor: c.surface, borderRadius: 20, padding: 16, gap: 12 },
+}));

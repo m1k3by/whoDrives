@@ -1,13 +1,14 @@
 import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
 import { useMyMembership } from '@/features/family/hooks';
 import { groupByDay } from '@/features/occurrences/days';
 import { filterOccurrences, type OccurrenceFilter } from '@/features/occurrences/filter';
 import { useOccurrences } from '@/features/occurrences/hooks';
 import { OccurrenceItem } from '@/features/occurrences/OccurrenceItem';
-import { Body, Button, Chip, ChipGrid, colors, Loading, Screen } from '@/ui/components';
+import { Body, Button, Chip, ChipGrid, Loading, Screen } from '@/ui/components';
 import { t } from '@/ui/strings';
+import { makeStyles } from '@/ui/theme';
 
 const FILTERS: OccurrenceFilter[] = ['all', 'open', 'mine'];
 
@@ -20,6 +21,7 @@ function nextTwoWeeks() {
 
 /** Overview: who does what in the next 14 days, filtered by all / open / mine. */
 export default function UpcomingScreen() {
+  const styles = useStyles();
   const { family, myId } = useMyMembership();
   const [[from, to]] = useState(nextTwoWeeks);
   const [filter, setFilter] = useState<OccurrenceFilter>('all');
@@ -63,7 +65,7 @@ export default function UpcomingScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   day: { gap: 10 },
-  dayLabel: { fontSize: 20, fontWeight: '700', color: colors.muted, marginTop: 8 },
-});
+  dayLabel: { fontSize: 20, fontWeight: '700', color: c.muted, marginTop: 8 },
+}));

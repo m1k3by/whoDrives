@@ -1,5 +1,5 @@
 import { useDeferredValue, useMemo, useState } from 'react';
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { Text, TextInput, View } from 'react-native';
 
 import { useMyMembership } from '@/features/family/hooks';
 import { groupByDay } from '@/features/occurrences/days';
@@ -7,8 +7,9 @@ import { useOccurrences } from '@/features/occurrences/hooks';
 import { addMonths, startOfToday } from '@/features/occurrences/month';
 import { OccurrenceItem } from '@/features/occurrences/OccurrenceItem';
 import { searchOccurrences } from '@/features/occurrences/search';
-import { Body, colors, Loading, Screen } from '@/ui/components';
+import { Body, Loading, Screen } from '@/ui/components';
 import { t } from '@/ui/strings';
+import { makeStyles } from '@/ui/theme';
 
 const MAX_RESULTS = 50;
 
@@ -19,6 +20,7 @@ function nextYear() {
 }
 
 export default function SearchScreen() {
+  const styles = useStyles();
   const { family, myId } = useMyMembership();
   const [[from, to]] = useState(nextYear);
   const [query, setQuery] = useState('');
@@ -62,16 +64,17 @@ export default function SearchScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   input: {
     fontSize: 22,
     minHeight: 60,
-    borderWidth: 2,
-    borderColor: colors.primary,
-    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: c.border,
+    backgroundColor: c.surface,
+    borderRadius: 14,
     paddingHorizontal: 16,
-    color: colors.text,
+    color: c.text,
   },
   day: { gap: 10 },
-  dayLabel: { fontSize: 20, fontWeight: '700', color: colors.muted, marginTop: 8 },
-});
+  dayLabel: { fontSize: 20, fontWeight: '700', color: c.muted, marginTop: 8 },
+}));

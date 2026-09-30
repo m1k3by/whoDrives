@@ -3,7 +3,6 @@ import {
   ActivityIndicator,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   type TextInputProps,
@@ -11,21 +10,13 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { makeStyles, useColors } from './theme';
+
 // Large type and touch targets: the app is also used by grandparents.
-export const colors = {
-  text: '#1a1a1a',
-  muted: '#555',
-  primary: '#0b5cad',
-  onPrimary: '#fff',
-  border: '#999',
-  error: '#b00020',
-  background: '#fff',
-  open: '#C62828', // occurrence nobody takes yet: action needed
-  covered: '#2E7D32', // occurrence somebody takes: all good
-  icon: '#5f6368', // outline icons in the header
-};
+// Colors come from the theme (light/dark, see ./theme).
 
 export function Screen({ children }: { children: ReactNode }) {
+  const styles = useStyles();
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.screen} keyboardShouldPersistTaps="handled">
@@ -36,6 +27,7 @@ export function Screen({ children }: { children: ReactNode }) {
 }
 
 export function Title({ children }: { children: ReactNode }) {
+  const styles = useStyles();
   return (
     <Text accessibilityRole="header" style={styles.title}>
       {children}
@@ -44,6 +36,7 @@ export function Title({ children }: { children: ReactNode }) {
 }
 
 export function Body({ children, error }: { children: ReactNode; error?: boolean }) {
+  const styles = useStyles();
   return <Text style={[styles.body, error && styles.error]}>{children}</Text>;
 }
 
@@ -58,6 +51,8 @@ export function Button({
   loading?: boolean;
   variant?: 'primary' | 'secondary';
 }) {
+  const styles = useStyles();
+  const c = useColors();
   const primary = variant === 'primary';
   return (
     <Pressable
@@ -72,7 +67,7 @@ export function Button({
       ]}
     >
       {loading ? (
-        <ActivityIndicator color={primary ? colors.onPrimary : colors.primary} />
+        <ActivityIndicator color={primary ? c.onPrimary : c.primary} />
       ) : (
         <Text style={[styles.buttonLabel, !primary && styles.buttonLabelSecondary]}>{label}</Text>
       )}
@@ -94,6 +89,7 @@ export function Chip({
   onPress: () => void;
   basis?: `${number}%`;
 }) {
+  const styles = useStyles();
   return (
     <Pressable
       accessibilityRole="button"
@@ -108,67 +104,84 @@ export function Chip({
 }
 
 export function ChipGrid({ children }: { children: ReactNode }) {
+  const styles = useStyles();
   return <View style={styles.chipGrid}>{children}</View>;
 }
 
 export function Field({ label, ...props }: TextInputProps & { label: string }) {
+  const styles = useStyles();
+  const c = useColors();
   return (
     <View style={styles.field}>
       <Text style={styles.label}>{label}</Text>
-      <TextInput accessibilityLabel={label} style={styles.input} {...props} />
+      <TextInput
+        accessibilityLabel={label}
+        style={styles.input}
+        placeholderTextColor={c.muted}
+        {...props}
+      />
     </View>
   );
 }
 
 export function Loading() {
+  const styles = useStyles();
+  const c = useColors();
   return (
     <View style={styles.center}>
-      <ActivityIndicator size="large" color={colors.primary} />
+      <ActivityIndicator size="large" color={c.primary} />
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
+const useStyles = makeStyles((c) => ({
+  safe: { flex: 1, backgroundColor: c.background },
   screen: { padding: 24, gap: 20 },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  title: { fontSize: 32, fontWeight: '700', color: colors.text },
-  body: { fontSize: 20, lineHeight: 28, color: colors.text },
-  error: { color: colors.error },
+  center: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: c.background,
+  },
+  title: { fontSize: 32, fontWeight: '700', color: c.text },
+  body: { fontSize: 20, lineHeight: 28, color: c.text },
+  error: { color: c.error },
   field: { gap: 8 },
-  label: { fontSize: 20, fontWeight: '600', color: colors.text },
+  label: { fontSize: 20, fontWeight: '600', color: c.text },
   input: {
     fontSize: 22,
     minHeight: 60,
-    borderWidth: 2,
-    borderColor: colors.border,
-    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: c.border,
+    backgroundColor: c.surface,
+    borderRadius: 14,
     paddingHorizontal: 16,
-    color: colors.text,
+    color: c.text,
   },
   button: {
     minHeight: 60,
-    borderRadius: 12,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 20,
   },
-  buttonPrimary: { backgroundColor: colors.primary },
-  buttonSecondary: { borderWidth: 2, borderColor: colors.primary },
-  buttonLabel: { fontSize: 22, fontWeight: '700', color: colors.onPrimary },
-  buttonLabelSecondary: { color: colors.primary },
+  buttonPrimary: { backgroundColor: c.primary },
+  buttonSecondary: { backgroundColor: c.surface, borderWidth: 1, borderColor: c.border },
+  buttonLabel: { fontSize: 22, fontWeight: '700', color: c.onPrimary },
+  buttonLabelSecondary: { color: c.primary },
   pressed: { opacity: 0.7 },
   chipGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   chip: {
     flexGrow: 1,
     minHeight: 52,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: colors.primary,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: c.border,
+    backgroundColor: c.surface,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  chipSelected: { backgroundColor: colors.primary },
-  chipLabel: { fontSize: 20, color: colors.primary, fontWeight: '600' },
-  chipLabelSelected: { color: colors.onPrimary },
-});
+  chipSelected: { backgroundColor: c.primary, borderColor: c.primary },
+  chipLabel: { fontSize: 20, color: c.text, fontWeight: '600' },
+  chipLabelSelected: { color: c.onPrimary },
+}));

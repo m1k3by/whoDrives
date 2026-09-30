@@ -4,13 +4,17 @@ import { Alert } from 'react-native';
 import { NameForm } from '@/features/profile/NameForm';
 import { useDeleteAccount, useLogout, useMyProfile } from '@/features/profile/hooks';
 import { PRIVACY_URL } from '@/lib/links';
-import { Body, Button, Loading, Screen } from '@/ui/components';
+import { Body, Button, Chip, ChipGrid, Loading, Screen } from '@/ui/components';
 import { t } from '@/ui/strings';
+import { type ThemeName, useTheme } from '@/ui/theme';
+
+const THEMES: ThemeName[] = ['light', 'dark'];
 
 export default function ProfileScreen() {
   const profile = useMyProfile();
   const logout = useLogout();
   const deleteAccount = useDeleteAccount();
+  const theme = useTheme();
 
   if (profile.isPending) return <Loading />;
   if (profile.isError) {
@@ -44,6 +48,18 @@ export default function ProfileScreen() {
     <Screen>
       <Body>{t.profile.loggedInAs(profile.data.email)}</Body>
       <NameForm profileId={profile.data.id} initialName={profile.data.display_name} />
+      <Body>{t.profile.appearance}</Body>
+      <ChipGrid>
+        {THEMES.map((name) => (
+          <Chip
+            key={name}
+            basis="45%"
+            label={t.profile.themes[name]}
+            selected={theme.name === name}
+            onPress={() => theme.setTheme(name)}
+          />
+        ))}
+      </ChipGrid>
       <Button label={t.profile.logout} variant="secondary" onPress={confirmLogout} />
       <Button
         label={t.profile.privacy}

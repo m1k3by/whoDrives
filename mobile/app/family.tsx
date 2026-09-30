@@ -1,12 +1,14 @@
 import { router } from 'expo-router';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import { Alert, Text, View } from 'react-native';
 
 import { useMyMembership, useRemoveMember } from '@/features/family/hooks';
 import { useOpenInvites, useRevokeInvite } from '@/features/invites/hooks';
-import { Body, Button, colors, Loading, Screen } from '@/ui/components';
+import { Body, Button, Loading, Screen } from '@/ui/components';
 import { t } from '@/ui/strings';
+import { makeStyles } from '@/ui/theme';
 
 export default function FamilyScreen() {
+  const styles = useStyles();
   const { family, myId } = useMyMembership();
   if (!family) return <Loading />;
   const { id: familyId, name: familyName } = family;
@@ -72,6 +74,7 @@ function RemoveMemberButton({
 }
 
 function OpenInvites({ familyId }: { familyId: string }) {
+  const styles = useStyles();
   const invites = useOpenInvites(familyId);
   const revoke = useRevokeInvite();
   if (!invites.data?.length) return null;
@@ -98,14 +101,14 @@ function OpenInvites({ familyId }: { familyId: string }) {
   );
 }
 
-const styles = StyleSheet.create({
-  heading: { fontSize: 24, fontWeight: '700', color: colors.text },
+const useStyles = makeStyles((c) => ({
+  heading: { fontSize: 24, fontWeight: '700', color: c.text },
   member: {
     gap: 8,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    borderBottomColor: c.border,
   },
-  memberName: { fontSize: 22, color: colors.text },
-  memberRole: { fontSize: 18, color: colors.muted },
-});
+  memberName: { fontSize: 22, color: c.text },
+  memberRole: { fontSize: 18, color: c.muted },
+}));

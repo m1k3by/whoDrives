@@ -25,6 +25,8 @@ export const t = {
     logout: 'Abmelden',
     logoutTitle: 'Abmelden?',
     logoutText: 'Zum erneuten Anmelden brauchst du wieder einen Code per E-Mail.',
+    appearance: 'Darstellung',
+    themes: { light: 'Hell', dark: 'Dunkel' },
     privacy: 'Datenschutzerklärung',
     delete: 'Konto löschen',
     deleteTitle: 'Konto endgültig löschen?',

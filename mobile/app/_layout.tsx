@@ -7,6 +7,7 @@ import { useUpdateRequired } from '@/features/app-version/useUpdateRequired';
 import { useSession } from '@/features/auth/useSession';
 import { Body, Button, Loading, Screen, Title } from '@/ui/components';
 import { t } from '@/ui/strings';
+import { ThemeProvider, useColors, useTheme } from '@/ui/theme';
 
 // supabase-js already retries network errors itself; one more retry is enough.
 // Data stays fresh for a minute: switching screens shows it instantly instead of a
@@ -21,13 +22,21 @@ const PLAY_STORE_URL =
 export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
-      <StatusBar style="dark" />
-      <Gate />
+      <ThemeProvider>
+        <ThemedStatusBar />
+        <Gate />
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
 
+function ThemedStatusBar() {
+  const { name } = useTheme();
+  return <StatusBar style={name === 'dark' ? 'light' : 'dark'} />;
+}
+
 function Gate() {
+  const c = useColors();
   const updateRequired = useUpdateRequired();
   const { session, retry } = useSession();
 
@@ -52,7 +61,14 @@ function Gate() {
   }
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        headerStyle: { backgroundColor: c.background },
+        headerTintColor: c.text,
+        contentStyle: { backgroundColor: c.background },
+      }}
+    >
       <Stack.Protected guard={!!session}>
         <Stack.Screen name="index" />
         {(

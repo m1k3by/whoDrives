@@ -1,10 +1,10 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
-import { colors } from '@/ui/components';
 import { t } from '@/ui/strings';
 
 import { dayKey, monthGrid } from './month';
 import { toneColor, type Tone } from './tone';
+import { makeStyles, useColors } from '@/ui/theme';
 
 // Building blocks shared by the home calendar and the date picker field.
 
@@ -21,6 +21,7 @@ export function MonthHeader({
   previousDisabled?: boolean;
   nextDisabled?: boolean;
 }) {
+  const styles = useStyles();
   return (
     <>
       <View style={styles.header}>
@@ -41,6 +42,7 @@ export function MonthHeader({
 }
 
 export function WeekdayRow() {
+  const styles = useStyles();
   return (
     <View style={styles.week}>
       {t.calendar.weekdaysShort.map((d) => (
@@ -66,6 +68,8 @@ export function MonthGrid({
   onSelect: (day: Date) => void;
   dots?: Map<string, Tone[]>;
 }) {
+  const styles = useStyles();
+  const c = useColors();
   const weeks = monthGrid(month);
   while (weeks.length < 6) weeks.push(Array<null>(7).fill(null));
   const selectedKey = selected && dayKey(selected);
@@ -106,7 +110,7 @@ export function MonthGrid({
                 </View>
                 <View style={styles.dots}>
                   {dayDots.slice(0, 3).map((tone, i) => (
-                    <View key={i} style={[styles.dot, { backgroundColor: toneColor[tone] }]} />
+                    <View key={i} style={[styles.dot, { backgroundColor: toneColor(c, tone) }]} />
                   ))}
                 </View>
               </Pressable>
@@ -129,6 +133,7 @@ function ArrowButton({
   disabled: boolean;
   onPress: () => void;
 }) {
+  const styles = useStyles();
   return (
     <Pressable
       accessibilityRole="button"
@@ -143,27 +148,27 @@ function ArrowButton({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  monthLabel: { fontSize: 24, fontWeight: '700', color: colors.text },
+  monthLabel: { fontSize: 24, fontWeight: '700', color: c.text },
   arrow: {
     width: 56,
     height: 56,
     borderRadius: 28,
     borderWidth: 2,
-    borderColor: colors.primary,
+    borderColor: c.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   arrowDisabled: { opacity: 0.3 },
-  arrowLabel: { fontSize: 32, lineHeight: 36, color: colors.primary, fontWeight: '700' },
+  arrowLabel: { fontSize: 32, lineHeight: 36, color: c.primary, fontWeight: '700' },
   week: { flexDirection: 'row' },
   weekday: {
     flex: 1,
     textAlign: 'center',
     fontSize: 16,
     fontWeight: '700',
-    color: colors.muted,
+    color: c.muted,
     paddingVertical: 8,
   },
   cell: { flex: 1, alignItems: 'center', minHeight: 56, paddingTop: 2 },
@@ -174,10 +179,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  today: { borderWidth: 2, borderColor: colors.primary },
-  selected: { backgroundColor: colors.primary },
-  dayNumber: { fontSize: 20, color: colors.text },
-  selectedNumber: { color: colors.onPrimary, fontWeight: '700' },
+  today: { borderWidth: 2, borderColor: c.primary },
+  selected: { backgroundColor: c.primary },
+  dayNumber: { fontSize: 20, color: c.text },
+  selectedNumber: { color: c.onPrimary, fontWeight: '700' },
   dots: { flexDirection: 'row', gap: 3, height: 10, alignItems: 'center' },
   dot: { width: 8, height: 8, borderRadius: 4 },
-});
+}));
