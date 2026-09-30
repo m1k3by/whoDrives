@@ -4,6 +4,7 @@ import { colors } from '@/ui/components';
 import { t } from '@/ui/strings';
 
 import { dayKey, monthGrid } from './month';
+import { toneColor, type Tone } from './tone';
 
 // Building blocks shared by the home calendar and the date picker field.
 
@@ -51,7 +52,7 @@ export function WeekdayRow() {
   );
 }
 
-/** Day grid of one month, always six rows (stable height). `dots`: colors per dayKey. */
+/** Day grid of one month, always six rows (stable height). `dots`: status per dayKey. */
 export function MonthGrid({
   month,
   today,
@@ -63,7 +64,7 @@ export function MonthGrid({
   today: Date;
   selected: Date | null;
   onSelect: (day: Date) => void;
-  dots?: Map<string, string[]>;
+  dots?: Map<string, Tone[]>;
 }) {
   const weeks = monthGrid(month);
   while (weeks.length < 6) weeks.push(Array<null>(7).fill(null));
@@ -84,7 +85,11 @@ export function MonthGrid({
                 key={d}
                 accessibilityRole="button"
                 accessibilityState={{ selected: isSelected }}
-                accessibilityLabel={t.calendar.dayA11y(day, dayDots.length > 0)}
+                accessibilityLabel={t.calendar.dayA11y(
+                  day,
+                  dayDots.filter((d) => d === 'open').length,
+                  dayDots.filter((d) => d === 'covered').length,
+                )}
                 onPress={() => onSelect(day)}
                 style={styles.cell}
               >
@@ -100,8 +105,8 @@ export function MonthGrid({
                   </Text>
                 </View>
                 <View style={styles.dots}>
-                  {dayDots.slice(0, 3).map((c) => (
-                    <View key={c} style={[styles.dot, { backgroundColor: c }]} />
+                  {dayDots.slice(0, 3).map((tone, i) => (
+                    <View key={i} style={[styles.dot, { backgroundColor: toneColor[tone] }]} />
                   ))}
                 </View>
               </Pressable>

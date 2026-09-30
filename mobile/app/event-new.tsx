@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
@@ -23,6 +23,8 @@ const DURATIONS = Object.keys(t.events.durations).map(
 
 export default function NewEventScreen() {
   const { family } = useMyMembership();
+  // Opened from the calendar's + button: start with the day selected there
+  const { date } = useLocalSearchParams<{ date?: string }>();
   const children = useChildren(family?.id);
   const create = useCreateEvent();
   const [error, setError] = useState<FormError | null>(null);
@@ -32,7 +34,7 @@ export default function NewEventScreen() {
     childId: null,
     location: '',
     weekly: true,
-    firstDate: '',
+    firstDate: date && /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : '',
     untilDate: '',
     time: '',
     durationMin: '60',

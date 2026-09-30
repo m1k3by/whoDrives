@@ -194,8 +194,14 @@ export const t = {
     next: 'Nächster Monat',
     noneOnDay: 'An diesem Tag steht nichts an.',
     upcoming: 'Die nächsten 14 Tage',
-    dayA11y: (d: Date, hasEvents: boolean) =>
-      `${d.getDate()}. ${t.calendar.months[d.getMonth()]}${hasEvents ? ', Termine' : ''}`,
+    dayA11y: (d: Date, open: number, covered: number) =>
+      [
+        `${d.getDate()}. ${t.calendar.months[d.getMonth()]}`,
+        open ? `${open} offen` : null,
+        covered ? `${covered} vergeben` : null,
+      ]
+        .filter(Boolean)
+        .join(', '),
   },
   dateField: {
     choose: 'Datum wählen',

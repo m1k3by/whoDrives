@@ -1,11 +1,10 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FlatList, type ListRenderItem, useWindowDimensions, View } from 'react-native';
 
-import { colors } from '@/ui/components';
-
 import { useOccurrences } from './hooks';
 import { addMonths, dayKey, startOfToday } from './month';
 import { MonthGrid, WeekdayRow } from './MonthGrid';
+import { dayTones, occurrenceTone, type Tone } from './tone';
 
 const MONTHS_BACK = 1;
 const MONTHS_AHEAD = 12; // occurrences are precomputed 12 months ahead
@@ -117,17 +116,15 @@ const MonthPage = memo(function MonthPage({
 }) {
   const occurrences = useOccurrences(familyId, month, addMonths(month, 1));
 
-  // Colors of the children with something on that day (cancelled ones don't count)
+  // One dot per occurrence: red = still open, green = somebody takes it
   const dots = useMemo(() => {
-    const byDay = new Map<string, string[]>();
+    const now = new Date();
+    const byDay = new Map<string, Tone[]>();
     for (const o of occurrences.data ?? []) {
-      if (o.status === 'cancelled') continue;
       const key = dayKey(new Date(o.starts_at));
-      const list = byDay.get(key) ?? [];
-      const color = o.events?.children?.color ?? colors.muted;
-      if (!list.includes(color)) list.push(color);
-      byDay.set(key, list);
+      byDay.set(key, [...(byDay.get(key) ?? []), occurrenceTone(o, now)]);
     }
+    for (const [key, tones] of byDay) byDay.set(key, dayTones(tones));
     return byDay;
   }, [occurrences.data]);
 

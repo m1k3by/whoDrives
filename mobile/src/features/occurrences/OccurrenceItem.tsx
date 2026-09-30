@@ -4,6 +4,7 @@ import { Button, colors } from '@/ui/components';
 import { t } from '@/ui/strings';
 
 import { timeLabel } from './days';
+import { occurrenceTone, toneColor } from './tone';
 import {
   AlreadyTakenError,
   useCancelOccurrence,
@@ -33,6 +34,7 @@ export function OccurrenceItem({
   const claimed = o.status === 'claimed';
   const mine = claimed && !!myId && o.assigned_to === myId;
   const over = new Date(o.ends_at) < new Date();
+  const tone = occurrenceTone(o, new Date());
   const title = o.events?.title ?? '';
   const assignee = o.assigned_to
     ? o.profiles?.display_name || t.family.unnamedMember
@@ -59,14 +61,20 @@ export function OccurrenceItem({
       }
       style={[
         styles.item,
-        { borderLeftColor: o.events?.children?.color ?? colors.border },
+        // red = still open (someone has to act), green = somebody takes it
+        { borderLeftColor: toneColor[tone] },
         cancelled && styles.cancelled,
       ]}
     >
-      <Text style={[styles.title, cancelled && styles.strike]}>
-        {timeLabel(new Date(o.starts_at))} {title}
-        {o.events?.children ? ` · ${o.events.children.first_name}` : ''}
-      </Text>
+      <View style={styles.titleRow}>
+        {o.events?.children && (
+          <View style={[styles.childDot, { backgroundColor: o.events.children.color }]} />
+        )}
+        <Text style={[styles.title, cancelled && styles.strike]}>
+          {timeLabel(new Date(o.starts_at))} {title}
+          {o.events?.children ? ` · ${o.events.children.first_name}` : ''}
+        </Text>
+      </View>
       <Text style={styles.line}>
         {cancelled
           ? t.occurrences.cancelled
@@ -75,7 +83,7 @@ export function OccurrenceItem({
       </Text>
 
       {!cancelled && (
-        <Text style={[styles.status, !claimed && styles.open, mine && styles.mine]}>
+        <Text style={[styles.status, { color: toneColor[tone] }]}>
           {!claimed
             ? t.occurrences.open
             : mine
@@ -124,13 +132,13 @@ export function OccurrenceItem({
 
 const styles = StyleSheet.create({
   item: { borderLeftWidth: 8, paddingLeft: 14, paddingVertical: 8, gap: 4 },
+  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  childDot: { width: 14, height: 14, borderRadius: 7 },
   cancelled: { opacity: 0.55 },
   strike: { textDecorationLine: 'line-through' },
   title: { fontSize: 22, fontWeight: '600', color: colors.text },
   line: { fontSize: 18, color: colors.muted },
-  status: { fontSize: 20, color: colors.text },
-  open: { fontWeight: '700', color: colors.open },
-  mine: { fontWeight: '700', color: colors.primary },
+  status: { fontSize: 20, fontWeight: '700' },
   actions: { gap: 8, marginTop: 4 },
   error: { fontSize: 18, color: colors.error },
 });

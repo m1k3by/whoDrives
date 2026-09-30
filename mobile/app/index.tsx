@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { type ReactNode, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -14,6 +14,7 @@ import { NameForm } from '@/features/profile/NameForm';
 import { useMyProfile } from '@/features/profile/hooks';
 import { usePushRegistration } from '@/features/push/register';
 import { Body, Button, colors, Field, Loading, Screen, Title } from '@/ui/components';
+import { MenuIcon, SearchIcon } from '@/ui/icons';
 import { t } from '@/ui/strings';
 
 export default function HomeScreen() {
@@ -68,6 +69,14 @@ export default function HomeScreen() {
         <Text style={styles.heading}>{dayLabel(selected, new Date())}</Text>
         <DayList familyId={family.data.id} day={selected} myId={profile.data.id} />
       </ScrollView>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t.events.new}
+        onPress={() => router.push({ pathname: '/event-new', params: { date: dayKey(selected) } })}
+        style={({ pressed }) => [styles.fab, pressed && styles.pressed]}
+      >
+        <Text style={styles.fabLabel}>+</Text>
+      </Pressable>
     </SafeAreaView>
   );
 }
@@ -86,7 +95,9 @@ function HomeHeader({
 }) {
   return (
     <View style={styles.header}>
-      <HeaderButton label="☰" a11y={t.header.menu} onPress={() => router.push('/menu')} />
+      <HeaderButton a11y={t.header.menu} onPress={() => router.push('/menu')}>
+        <MenuIcon />
+      </HeaderButton>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={t.header.toggleCalendar(expanded)}
@@ -98,20 +109,24 @@ function HomeHeader({
           {t.calendar.months[month.getMonth()]} {month.getFullYear()} {expanded ? '▴' : '▾'}
         </Text>
       </Pressable>
-      <HeaderButton label="🔍" a11y={t.header.search} onPress={() => router.push('/search')} />
-      <HeaderButton label={t.header.today} a11y={t.header.today} onPress={onToday} />
+      <HeaderButton a11y={t.header.search} onPress={() => router.push('/search')}>
+        <SearchIcon />
+      </HeaderButton>
+      <HeaderButton a11y={t.header.today} onPress={onToday}>
+        <Text style={styles.headerButtonLabel}>{t.header.today}</Text>
+      </HeaderButton>
     </View>
   );
 }
 
 function HeaderButton({
-  label,
   a11y,
   onPress,
+  children,
 }: {
-  label: string;
   a11y: string;
   onPress: () => void;
+  children: ReactNode;
 }) {
   return (
     <Pressable
@@ -120,7 +135,7 @@ function HeaderButton({
       onPress={onPress}
       style={({ pressed }) => [styles.headerButton, pressed && styles.pressed]}
     >
-      <Text style={styles.headerButtonLabel}>{label}</Text>
+      {children}
     </Pressable>
   );
 }
@@ -215,7 +230,21 @@ function ProfileButton() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   heading: { fontSize: 24, fontWeight: '700', color: colors.text },
-  dayList: { padding: 24, gap: 16 },
+  // bottom padding keeps the last entry clear of the + button
+  dayList: { padding: 24, paddingBottom: 120, gap: 16 },
+  fab: {
+    position: 'absolute',
+    right: 20,
+    bottom: 28,
+    width: 68,
+    height: 68,
+    borderRadius: 34,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 4,
+  },
+  fabLabel: { fontSize: 40, lineHeight: 44, color: colors.onPrimary, fontWeight: '400' },
   header: {
     flexDirection: 'row',
     alignItems: 'center',

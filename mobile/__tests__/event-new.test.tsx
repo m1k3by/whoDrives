@@ -13,7 +13,11 @@ jest.mock('@/features/events/hooks', () => ({
 jest.mock('@/features/family/hooks', () => ({
   useMyMembership: () => ({ family: { id: 'fam-1' } }),
 }));
-jest.mock('expo-router', () => ({ router: { back: jest.fn() } }));
+let mockParams: { date?: string } = {};
+jest.mock('expo-router', () => ({
+  router: { back: jest.fn() },
+  useLocalSearchParams: () => mockParams,
+}));
 
 beforeAll(() => jest.useFakeTimers({ now: new Date(2026, 9, 5, 12, 0) })); // Mon 05.10.2026
 afterAll(() => jest.useRealTimers());
@@ -50,6 +54,14 @@ test('"Reiten, jeden Dienstag 15:30, 1½ Std." is saved without typing date, tim
     }),
     expect.anything(),
   );
+});
+
+test('opened from the calendar: the chosen day is preselected', async () => {
+  mockParams = { date: '2026-10-20' };
+  await render(<NewEventScreen />);
+  expect(screen.getByLabelText('Erster Termin: Dienstag, 20.10.2026')).toBeTruthy();
+  expect(screen.getByText('Wiederholt sich jeden Dienstag.')).toBeTruthy();
+  mockParams = {};
 });
 
 test('saving without date and time shows what is missing', async () => {

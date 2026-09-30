@@ -4,7 +4,7 @@ import { FlatList } from 'react-native';
 
 import { MonthCalendar } from './MonthCalendar';
 
-// Oct 6: open, Oct 7: only a cancelled one, Oct 14: open.
+// Oct 6: open, Oct 7: only a cancelled one, Oct 14: open, Oct 20: taken.
 const rows = [
   {
     id: '1',
@@ -25,6 +25,13 @@ const rows = [
     starts_at: '2026-10-14T13:00:00Z',
     ends_at: '2026-10-14T14:00:00Z',
     status: 'open',
+    events: { children: { color: '#2E9E44' } },
+  },
+  {
+    id: '4',
+    starts_at: '2026-10-20T13:00:00Z',
+    ends_at: '2026-10-20T14:00:00Z',
+    status: 'claimed',
     events: { children: { color: '#2E9E44' } },
   },
 ];
@@ -65,16 +72,17 @@ test('shows the month of the selected day with German weekdays', async () => {
   expect(screen.getByText('So')).toBeTruthy();
 });
 
-test('days with non-cancelled occurrences are announced as having events', async () => {
+test('days announce open (red) and taken (green) occurrences, cancelled ones not', async () => {
   await renderCalendar();
-  expect(await screen.findByLabelText('6. Oktober, Termine')).toBeTruthy();
-  expect(screen.getByLabelText('14. Oktober, Termine')).toBeTruthy();
+  expect(await screen.findByLabelText('6. Oktober, 1 offen')).toBeTruthy();
+  expect(screen.getByLabelText('14. Oktober, 1 offen')).toBeTruthy();
   expect(screen.getByLabelText('7. Oktober')).toBeTruthy();
+  expect(screen.getByLabelText('20. Oktober, 1 vergeben')).toBeTruthy();
 });
 
 test('tapping a day selects it', async () => {
   const onSelect = await renderCalendar();
-  await fireEvent.press(await screen.findByLabelText('14. Oktober, Termine'));
+  await fireEvent.press(await screen.findByLabelText('14. Oktober, 1 offen'));
   expect(onSelect).toHaveBeenCalledWith(new Date(2026, 9, 14));
 });
 
