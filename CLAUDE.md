@@ -11,7 +11,7 @@ Spec: [docs/SPEC.md](docs/SPEC.md). App in `mobile/` (eigene Regeln in `mobile/A
 - Jede Funktion muss sich sofort anfühlen (Entscheidung 30.09.2026): Aktionen optimistisch anzeigen und bei Fehler zurückdrehen, keine unnötigen Neuladungen (staleTime, gezielt invalidieren), Listen und Kalender nur sichtbare Teile rendern. Langsamkeit mit Messung belegen (z. B. VirtualizedList-Warnung, Metro-Log), nicht raten.
 - UI für ältere Nutzer: große Schrift, große Buttons, klare deutsche Texte. Monatskalender nur mit großer Tagesliste darunter, keine Stunden-Zeitleiste (Entscheidung 28.09.2026). Alle Texte in `mobile/src/ui/strings.ts`.
 - Code und Bezeichner auf Englisch, Commits nach Conventional Commits.
-- Commit und Push macht nur Michael. Claude liefert die Commit-Message.
+- Commit und Push macht nur Michael. Claude liefert einen fertigen einzeiligen Befehl `git commit -m "type(scope): ein Satz"` – ohne Body, nie `Co-Authored-By` oder sonst ein Hinweis auf Claude.
 
 ## Lokal
 
