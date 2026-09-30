@@ -20,16 +20,19 @@ const config: ExpoConfig = {
   android: {
     package: 'com.michael_stoecker.whodrives',
     adaptiveIcon: {
-      backgroundColor: '#E6F4FE',
+      backgroundColor: '#3B4BC8',
       foregroundImage: './assets/android-icon-foreground.png',
-      backgroundImage: './assets/android-icon-background.png',
       monochromeImage: './assets/android-icon-monochrome.png',
     },
     predictiveBackGestureEnabled: false,
     googleServicesFile,
   },
   ios: { supportsTablet: true },
-  plugins: ['expo-router', 'expo-secure-store', 'expo-notifications'],
+  plugins: [
+    'expo-router',
+    'expo-secure-store',
+    ['expo-notifications', { icon: './assets/notification-icon.png', color: '#3B4BC8' }],
+  ],
   experiments: { typedRoutes: true },
   extra: { eas: { projectId: EAS_PROJECT_ID } },
 };
