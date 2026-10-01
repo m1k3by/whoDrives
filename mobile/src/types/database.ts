@@ -57,13 +57,19 @@ isOneToOne: false
                   ]
                 },"events": {
                   Row: {
-                    "child_id": string,"created_at": string,"created_by": string | null,"duration_min": number,"family_id": string,"first_date": string,"id": string,"kind": Database["public"]['Enums']["event_kind"],"location": string | null,"rrule": string | null,"start_time": string,"timezone": string,"title": string,"until_date": string | null
+                    "child_id": string,"child_ids": (string)[],"created_at": string,"created_by": string | null,"duration_min": number,"family_id": string,"first_date": string,"id": string,"kind": Database["public"]['Enums']["event_kind"],"location": string | null,"rrule": string | null,"start_time": string,"timezone": string,"title": string,"until_date": string | null,"event_children": {
+              "color": string,
+"created_at": string,
+"family_id": string,
+"first_name": string,
+"id": string
+            } | null
                   }
                   Insert: {
-                    "child_id": string,"created_at"?: string,"created_by"?: string | null,"duration_min"?: number,"family_id": string,"first_date": string,"id"?: string,"kind"?: Database["public"]['Enums']["event_kind"],"location"?: string | null,"rrule"?: string | null,"start_time": string,"timezone"?: string,"title": string,"until_date"?: string | null
+                    "child_id": string,"child_ids": (string)[],"created_at"?: string,"created_by"?: string | null,"duration_min"?: number,"family_id": string,"first_date": string,"id"?: string,"kind"?: Database["public"]['Enums']["event_kind"],"location"?: string | null,"rrule"?: string | null,"start_time": string,"timezone"?: string,"title": string,"until_date"?: string | null
                   }
                   Update: {
-                    "child_id"?: string,"created_at"?: string,"created_by"?: string | null,"duration_min"?: number,"family_id"?: string,"first_date"?: string,"id"?: string,"kind"?: Database["public"]['Enums']["event_kind"],"location"?: string | null,"rrule"?: string | null,"start_time"?: string,"timezone"?: string,"title"?: string,"until_date"?: string | null
+                    "child_id"?: string,"child_ids"?: (string)[],"created_at"?: string,"created_by"?: string | null,"duration_min"?: number,"family_id"?: string,"first_date"?: string,"id"?: string,"kind"?: Database["public"]['Enums']["event_kind"],"location"?: string | null,"rrule"?: string | null,"start_time"?: string,"timezone"?: string,"title"?: string,"until_date"?: string | null
                   }
                   Relationships: [
                     {
@@ -249,6 +255,9 @@ isOneToOne: false
 "cancel_occurrence":
 { Args: { "p_occurrence_id": string }; Returns: undefined
                            },
+"child_names":
+{ Args: { "p_child_ids": (string)[] }; Returns: string
+                           },
 "claim_occurrence":
 { Args: { "p_occurrence_id": string }; Returns: boolean
                            },
@@ -269,6 +278,20 @@ isOneToOne: false
 "enqueue_scheduled_notifications":
 { Args: { "p_now"?: string }; Returns: undefined
                            },
+"event_children":
+{ Args: { "": Database["public"]['Tables']["events"]['Row'] }; Returns: {
+              "color": string,
+"created_at": string,
+"family_id": string,
+"first_name": string,
+"id": string
+            }[]
+                          SetofOptions: {
+          from: "events"
+          to: "children"
+          isOneToOne: false
+          isSetofReturn: true
+        } },
 "family_member_ids":
 { Args: { "p_except": string,"p_family_id": string,"p_parents_only": boolean }; Returns: (string)[]
                            },
@@ -419,4 +442,3 @@ export const Constants = {
           }
         }
 } as const
-

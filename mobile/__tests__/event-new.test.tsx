@@ -7,7 +7,12 @@ jest.setTimeout(60_000);
 
 const mockMutate = jest.fn();
 jest.mock('@/features/events/hooks', () => ({
-  useChildren: () => ({ data: [{ id: 'child-lena', first_name: 'Lena', color: '#1E6FD9' }] }),
+  useChildren: () => ({
+    data: [
+      { id: 'child-lena', first_name: 'Lena', color: '#1E6FD9' },
+      { id: 'child-tom', first_name: 'Tom', color: '#2E9E44' },
+    ],
+  }),
   useCreateEvent: () => ({ mutate: mockMutate, isPending: false, isError: false }),
 }));
 jest.mock('@/features/family/hooks', () => ({
@@ -74,4 +79,27 @@ test('saving without date and time shows what is missing', async () => {
 
   expect(screen.getByText('Bitte wähle ein Datum.')).toBeTruthy();
   expect(mockMutate).not.toHaveBeenCalled();
+});
+
+test('both children can be chosen for one appointment; tapping again removes one', async () => {
+  mockMutate.mockClear();
+  mockParams = { date: '2026-10-20' };
+  await render(<NewEventScreen />);
+
+  await fireEvent.changeText(screen.getByLabelText('Was?'), 'Schwimmen');
+  await fireEvent.press(screen.getByText('Tom'));
+  await fireEvent.press(screen.getByText('Lena'));
+  await fireEvent.press(screen.getByText('✓ Tom')); // removed again
+  await fireEvent.press(screen.getByText('Tom')); // and added after Lena
+  await fireEvent.press(screen.getByLabelText('Uhrzeit: Uhrzeit wählen'));
+  await fireEvent.press(screen.getByLabelText('15 Uhr'));
+  await fireEvent.press(screen.getByLabelText('0 Minuten'));
+  await fireEvent.press(screen.getByText('Übernehmen'));
+  await fireEvent.press(screen.getByText('Termin speichern'));
+
+  expect(mockMutate).toHaveBeenCalledWith(
+    expect.objectContaining({ child_id: 'child-lena', child_ids: ['child-lena', 'child-tom'] }),
+    expect.anything(),
+  );
+  mockParams = {};
 });

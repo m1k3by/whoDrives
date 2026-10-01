@@ -40,7 +40,7 @@ export function useEvents(familyId: string | undefined) {
       const { data, error } = await supabase
         .from('events')
         .select(
-          'id, title, kind, location, start_time, duration_min, rrule, first_date, until_date, timezone, children(first_name, color)',
+          'id, title, kind, location, start_time, duration_min, rrule, first_date, until_date, timezone, event_children(first_name, color)',
         )
         .eq('family_id', familyId!)
         .order('first_date');

@@ -13,7 +13,7 @@ export function useOccurrences(familyId: string | undefined, from: Date, to: Dat
       const { data, error } = await supabase
         .from('occurrences')
         .select(
-          'id, starts_at, ends_at, status, assigned_to, profiles(display_name), events(title, kind, location, children(first_name, color))',
+          'id, starts_at, ends_at, status, assigned_to, profiles(display_name), events(title, kind, location, event_children(first_name, color))',
         )
         .eq('family_id', familyId!)
         .gte('ends_at', range[0])

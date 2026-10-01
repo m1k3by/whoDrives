@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { Alert, Text, View } from 'react-native';
 
 import { addToPhoneCalendar, seriesEntry } from '@/features/events/calendar';
-import { describeSchedule } from '@/features/events/form';
+import { childNames, describeSchedule } from '@/features/events/form';
 import { useEvents } from '@/features/events/hooks';
 import { useMyMembership } from '@/features/family/hooks';
 import { Body, Button, Loading, Screen } from '@/ui/components';
@@ -28,10 +28,13 @@ export default function EventsScreen() {
       <Button label={t.events.new} onPress={() => router.push('/event-new')} />
       {events.data.length === 0 && <Body>{t.events.none}</Body>}
       {events.data.map((e) => (
-        <View key={e.id} style={[styles.card, { borderLeftColor: e.children?.color ?? c.border }]}>
+        <View
+          key={e.id}
+          style={[styles.card, { borderLeftColor: e.event_children[0]?.color ?? c.border }]}
+        >
           <Text style={styles.title}>
             {e.title}
-            {e.children ? ` · ${e.children.first_name}` : ''}
+            {e.event_children.length ? ` · ${childNames(e.event_children)}` : ''}
           </Text>
           <Text style={styles.line}>{describeSchedule(e)}</Text>
           <Text style={styles.line}>
@@ -42,9 +45,9 @@ export default function EventsScreen() {
             label={t.events.addSeriesToCalendar}
             variant="secondary"
             onPress={() =>
-              addToPhoneCalendar(seriesEntry({ ...e, childName: e.children?.first_name })).catch(
-                () => Alert.alert(t.common.genericError),
-              )
+              addToPhoneCalendar(
+                seriesEntry({ ...e, childName: childNames(e.event_children) }),
+              ).catch(() => Alert.alert(t.common.genericError))
             }
           />
         </View>

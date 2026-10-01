@@ -90,7 +90,7 @@ Zentral ist die Trennung von `events` (die Regel, z. B. „Reiten jeden Dienstag
 | app_config | Mindestversion der App | key, value (z. B. min_app_version) | Step 0 |
 | invites | Einladungen in eine Familie | family_id, token_hash, role, expires_at, used_at, used_by | Step 2 |
 | children | Kinder der Familie | family_id, first_name, color | Step 3 |
-| events | Terminregel | family_id, child_id, title, kind (ride, pickup, care, other), location, start_time, duration_min, timezone, rrule (null = einmalig), first_date, until_date | Step 3 |
+| events | Terminregel | family_id, child_ids (ein oder mehrere Kinder, Entscheidung 01.10.2026; child_id = erstes Kind, bleibt für ältere App-Versionen), title, kind (ride, pickup, care, other), location, start_time, duration_min, timezone, rrule (null = einmalig), first_date, until_date | Step 3 |
 | occurrences | Konkreter Termin | event_id, family_id, starts_at, ends_at, status (open, claimed, cancelled), assigned_to, note; unique (event_id, starts_at) | Step 4 |
 | push_tokens | Expo-Push-Token je Gerät | user_id, token, platform, updated_at | Step 6 |
 

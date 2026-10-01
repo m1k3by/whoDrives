@@ -69,6 +69,7 @@ select is((select count(*)::int from public.events e, public.event_children(e) c
             where e.id = 'e9000000-0000-0000-0000-00000000000b'), 0,
   'other families see nothing');
 reset role;
+select set_config('request.jwt.claims', '', true); -- server side: no logged-in user
 
 select throws_ok(
   $$insert into public.events (family_id, child_id, child_ids, title, start_time, first_date)

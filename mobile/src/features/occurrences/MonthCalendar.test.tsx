@@ -11,28 +11,28 @@ const rows = [
     starts_at: '2026-10-06T13:00:00Z',
     ends_at: '2026-10-06T14:00:00Z',
     status: 'open',
-    events: { children: { color: '#1E6FD9' } },
+    events: { event_children: [{ color: '#1E6FD9' }] },
   },
   {
     id: '2',
     starts_at: '2026-10-07T15:00:00Z',
     ends_at: '2026-10-07T16:00:00Z',
     status: 'cancelled',
-    events: { children: { color: '#D63031' } },
+    events: { event_children: [{ color: '#D63031' }] },
   },
   {
     id: '3',
     starts_at: '2026-10-14T13:00:00Z',
     ends_at: '2026-10-14T14:00:00Z',
     status: 'open',
-    events: { children: { color: '#2E9E44' } },
+    events: { event_children: [{ color: '#2E9E44' }] },
   },
   {
     id: '4',
     starts_at: '2026-10-20T13:00:00Z',
     ends_at: '2026-10-20T14:00:00Z',
     status: 'claimed',
-    events: { children: { color: '#2E9E44' } },
+    events: { event_children: [{ color: '#2E9E44' }] },
   },
 ];
 

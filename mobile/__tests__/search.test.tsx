@@ -16,7 +16,7 @@ const row = (id: string, day: number, title: string, child: string) => ({
     title,
     kind: 'ride',
     location: null,
-    children: { first_name: child, color: '#1E6FD9' },
+    event_children: [{ first_name: child, color: '#1E6FD9' }],
   },
 });
 const mockRows = [row('1', 6, 'Reiten', 'Lena'), row('2', 7, 'Fußball', 'Max')];

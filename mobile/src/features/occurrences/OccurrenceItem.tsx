@@ -1,6 +1,7 @@
 import { Alert, Linking, Pressable, Text, View } from 'react-native';
 
 import { addToPhoneCalendar, occurrenceEntry } from '@/features/events/calendar';
+import { childNames } from '@/features/events/form';
 import { mapsUrl } from '@/lib/links';
 
 import { Button } from '@/ui/components';
@@ -42,6 +43,7 @@ export function OccurrenceItem({
   const over = new Date(o.ends_at) < new Date();
   const tone = occurrenceTone(o, new Date());
   const title = o.events?.title ?? '';
+  const kids = o.events?.event_children ?? [];
   const assignee = o.assigned_to
     ? o.profiles?.display_name || t.family.unnamedMember
     : t.occurrences.formerMember;
@@ -72,15 +74,19 @@ export function OccurrenceItem({
         cancelled && styles.cancelled,
       ]}
     >
-      <View style={styles.titleRow}>
-        {o.events?.children && (
-          <View style={[styles.childDot, { backgroundColor: o.events.children.color }]} />
-        )}
-        <Text style={[styles.title, cancelled && styles.strike]}>
-          {timeLabel(new Date(o.starts_at))} {title}
-          {o.events?.children ? ` · ${o.events.children.first_name}` : ''}
-        </Text>
-      </View>
+      <Text style={[styles.title, cancelled && styles.strike]}>
+        {timeLabel(new Date(o.starts_at))} {title}
+      </Text>
+      {kids.length > 0 && (
+        <View style={styles.kids}>
+          {kids.map((k) => (
+            <View key={k.first_name} style={styles.kid}>
+              <View style={[styles.childDot, { backgroundColor: k.color }]} />
+              <Text style={styles.kidName}>{k.first_name}</Text>
+            </View>
+          ))}
+        </View>
+      )}
       <Text style={styles.line}>
         {cancelled
           ? t.occurrences.cancelled
@@ -103,7 +109,7 @@ export function OccurrenceItem({
           onPress={() =>
             addToPhoneCalendar(
               occurrenceEntry({
-                title: o.events?.children ? `${title} (${o.events.children.first_name})` : title,
+                title: kids.length ? `${title} (${childNames(kids)})` : title,
                 location: o.events?.location ?? null,
                 startsAt: o.starts_at,
                 endsAt: o.ends_at,
@@ -175,7 +181,9 @@ const useStyles = makeStyles((c) => ({
     paddingVertical: 12,
     gap: 4,
   },
-  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  kids: { flexDirection: 'row', flexWrap: 'wrap', columnGap: 16, rowGap: 4 },
+  kid: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  kidName: { fontSize: 18, color: c.text },
   childDot: { width: 14, height: 14, borderRadius: 7 },
   cancelled: { opacity: 0.55 },
   strike: { textDecorationLine: 'line-through' },

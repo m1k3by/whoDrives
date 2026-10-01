@@ -24,7 +24,8 @@ const dayIndex = (isoDate: string) => new Date(`${isoDate}T00:00:00Z`).getUTCDay
 export type EventForm = {
   title: string;
   kind: EventKind;
-  childId: string | null;
+  /** in the chosen order; the first one is the event's main child */
+  childIds: string[];
   location: string;
   weekly: boolean;
   /** "YYYY-MM-DD" from the date picker, '' = not chosen */
@@ -41,7 +42,7 @@ export function toEventInsert(
   familyId: string,
 ): { ok: true; value: EventInsert } | { ok: false; error: FormError } {
   if (!form.title.trim()) return { ok: false, error: 'title' };
-  if (!form.childId) return { ok: false, error: 'child' };
+  if (form.childIds.length === 0) return { ok: false, error: 'child' };
   const firstDate = form.firstDate;
   if (!ISO_DATE.test(firstDate)) return { ok: false, error: 'date' };
   const time = parseTime(form.time);
@@ -56,7 +57,8 @@ export function toEventInsert(
     ok: true,
     value: {
       family_id: familyId,
-      child_id: form.childId,
+      child_id: form.childIds[0],
+      child_ids: form.childIds,
       title: form.title.trim(),
       kind: form.kind,
       location: form.location.trim() || null,
@@ -68,6 +70,10 @@ export function toEventInsert(
     },
   };
 }
+
+/** "Lena, Tom" */
+export const childNames = (children: { first_name: string }[] | undefined) =>
+  (children ?? []).map((c) => c.first_name).join(', ');
 
 const germanDate = (isoDate: string) => isoDate.split('-').reverse().join('.');
 

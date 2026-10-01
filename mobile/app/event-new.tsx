@@ -34,7 +34,7 @@ export default function NewEventScreen() {
   const [form, setForm] = useState<EventForm>({
     title: '',
     kind: 'ride',
-    childId: null,
+    childIds: [],
     location: '',
     weekly: true,
     firstDate: date && /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : '',
@@ -66,14 +66,24 @@ export default function NewEventScreen() {
 
       <Text style={styles.label}>{t.events.childLabel}</Text>
       {children.data?.length === 0 && <Body>{t.events.noChildren}</Body>}
-      {children.data?.map((c) => (
-        <Button
-          key={c.id}
-          label={c.first_name}
-          variant={form.childId === c.id ? 'primary' : 'secondary'}
-          onPress={() => set({ childId: c.id })}
-        />
-      ))}
+      {(children.data?.length ?? 0) > 1 && <Body>{t.events.childHint}</Body>}
+      {children.data?.map((c) => {
+        const chosen = form.childIds.includes(c.id);
+        return (
+          <Button
+            key={c.id}
+            label={chosen ? t.events.childSelected(c.first_name) : c.first_name}
+            variant={chosen ? 'primary' : 'secondary'}
+            onPress={() =>
+              set({
+                childIds: chosen
+                  ? form.childIds.filter((id) => id !== c.id)
+                  : [...form.childIds, c.id],
+              })
+            }
+          />
+        );
+      })}
 
       <Text style={styles.label}>{t.events.kindLabel}</Text>
       <View style={styles.row}>

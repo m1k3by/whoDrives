@@ -9,7 +9,7 @@ const event = (title: string) => ({
   title,
   kind: 'ride',
   location: null,
-  children: { first_name: 'Lena', color: '#1E6FD9' },
+  event_children: [{ first_name: 'Lena', color: '#1E6FD9' }],
 });
 const mockRows = [
   {

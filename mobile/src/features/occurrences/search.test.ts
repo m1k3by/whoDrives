@@ -15,7 +15,12 @@ const occ = (
     status: who ? 'claimed' : 'open',
     assigned_to: who ? `user-${who}` : null,
     profiles: who ? { display_name: who } : null,
-    events: { title, kind: 'ride', location, children: { first_name: child, color: '#000000' } },
+    events: {
+      title,
+      kind: 'ride',
+      location,
+      event_children: [{ first_name: child, color: '#000000' }],
+    },
   }) as Occurrence;
 
 const items = [
@@ -40,4 +45,11 @@ test.each([
 
 test('empty query finds nothing (the screen shows a hint instead)', () => {
   expect(searchOccurrences(items, '   ')).toEqual([]);
+});
+
+test('an appointment for two children is found by either name', () => {
+  const swim = occ('4', 'Schwimmen', 'Lena', null, null);
+  swim.events!.event_children.push({ first_name: 'Max', color: '#000000' });
+  expect(searchOccurrences([swim], 'max').map((o) => o.id)).toEqual(['4']);
+  expect(searchOccurrences([swim], 'lena schwimmen').map((o) => o.id)).toEqual(['4']);
 });

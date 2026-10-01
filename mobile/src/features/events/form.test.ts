@@ -14,7 +14,7 @@ test.each([
 const form: EventForm = {
   title: ' Reiten ',
   kind: 'ride',
-  childId: 'child-1',
+  childIds: ['child-1'],
   location: '',
   weekly: true,
   firstDate: '2026-10-06', // a Tuesday
@@ -29,6 +29,7 @@ test('"Reiten, jeden Di 15 Uhr" becomes a weekly rule on Tuesday', () => {
     value: {
       family_id: 'fam-1',
       child_id: 'child-1',
+      child_ids: ['child-1'],
       title: 'Reiten',
       kind: 'ride',
       location: null,
@@ -39,6 +40,14 @@ test('"Reiten, jeden Di 15 Uhr" becomes a weekly rule on Tuesday', () => {
       until_date: null,
     },
   });
+});
+
+test('several children: all are saved in the chosen order, the first is the main child', () => {
+  const r = toEventInsert({ ...form, childIds: ['child-2', 'child-1'] }, 'fam-1');
+  expect(r.ok && [r.value.child_id, r.value.child_ids]).toEqual([
+    'child-2',
+    ['child-2', 'child-1'],
+  ]);
 });
 
 test('weekday comes from the first date (Sunday)', () => {
@@ -58,7 +67,7 @@ test('weekly event keeps a chosen end date', () => {
 
 test.each([
   [{ title: '  ' }, 'title'],
-  [{ childId: null }, 'child'],
+  [{ childIds: [] }, 'child'],
   [{ firstDate: '' }, 'date'],
   [{ time: '25:00' }, 'time'],
   [{ durationMin: '0' }, 'duration'],

@@ -1,3 +1,4 @@
+import { childNames } from '@/features/events/form';
 import { t } from '@/ui/strings';
 
 import type { Occurrence } from './hooks';
@@ -12,7 +13,7 @@ export function searchOccurrences(items: Occurrence[], query: string): Occurrenc
   return items.filter((o) => {
     const text = [
       o.events?.title,
-      o.events?.children?.first_name,
+      childNames(o.events?.event_children),
       o.events?.location,
       o.events ? t.events.kinds[o.events.kind] : null,
       o.profiles?.display_name,

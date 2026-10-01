@@ -39,7 +39,7 @@ const occurrence = (patch: Partial<Occurrence> = {}): Occurrence => ({
     title: 'Reiten',
     kind: 'ride',
     location: null,
-    children: { first_name: 'Lena', color: '#1E6FD9' },
+    event_children: [{ first_name: 'Lena', color: '#1E6FD9' }],
   },
   ...patch,
 });
@@ -159,4 +159,28 @@ test('"In meinen Kalender" hands the occurrence to the phone calendar', async ()
     startDate: new Date('2026-10-06T13:00:00Z'),
     endDate: new Date('2026-10-06T14:00:00Z'),
   });
+});
+
+test('two children: both are shown with their color and named in the phone calendar', async () => {
+  mockCreateEvent.mockClear();
+  await show(
+    occurrence({
+      events: {
+        ...occurrence().events!,
+        title: 'Schwimmen',
+        event_children: [
+          { first_name: 'Lena', color: '#1E6FD9' },
+          { first_name: 'Tom', color: '#2E9E44' },
+        ],
+      },
+    }),
+    OMA,
+  );
+
+  expect(screen.getByText('Lena')).toBeTruthy();
+  expect(screen.getByText('Tom')).toBeTruthy();
+  await fireEvent.press(screen.getByText('In meinen Kalender'));
+  expect(mockCreateEvent).toHaveBeenCalledWith(
+    expect.objectContaining({ title: 'Schwimmen (Lena, Tom)' }),
+  );
 });
