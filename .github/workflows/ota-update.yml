@@ -3,7 +3,7 @@ name: OTA update
 on:
   push:
     branches: [main]
-    paths: ['mobile/**']
+    paths: ['mobile/**', '.github/workflows/ota-update.yml']
 
 concurrency: ota-update
 
@@ -36,7 +36,9 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
       - run: npm ci
         working-directory: mobile
-      - run: eas update --channel production --environment production --message "$MESSAGE" --non-interactive
+      # Android only: "all" would include web, which the app does not have (no react-native-web).
+      # Add ios here once the iOS app exists.
+      - run: eas update --channel production --environment production --platform android --message "$MESSAGE" --non-interactive
         working-directory: mobile
         env:
           MESSAGE: ${{ github.event.head_commit.message }}
