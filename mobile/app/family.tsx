@@ -5,7 +5,7 @@ import { useMyMembership, useRemoveMember } from '@/features/family/hooks';
 import { useOpenInvites, useRevokeInvite } from '@/features/invites/hooks';
 import { Body, Button, Loading, Screen } from '@/ui/components';
 import { t } from '@/ui/strings';
-import { makeStyles } from '@/ui/theme';
+import { font, makeStyles } from '@/ui/theme';
 
 export default function FamilyScreen() {
   const styles = useStyles();
@@ -102,13 +102,13 @@ function OpenInvites({ familyId }: { familyId: string }) {
 }
 
 const useStyles = makeStyles((c) => ({
-  heading: { fontSize: 24, fontWeight: '700', color: c.text },
+  heading: { fontSize: font.heading, fontWeight: '600', color: c.text },
   member: {
     gap: 8,
     paddingVertical: 16,
     borderBottomWidth: 1,
     borderBottomColor: c.border,
   },
-  memberName: { fontSize: 22, color: c.text },
-  memberRole: { fontSize: 18, color: c.muted },
+  memberName: { fontSize: font.body, fontWeight: '500', color: c.text },
+  memberRole: { fontSize: font.small, color: c.muted },
 }));

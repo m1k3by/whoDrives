@@ -6,7 +6,7 @@ import { useDeleteAccount, useLogout, useMyProfile } from '@/features/profile/ho
 import { PRIVACY_URL } from '@/lib/links';
 import { Body, Button, Loading, Screen } from '@/ui/components';
 import { t } from '@/ui/strings';
-import { makeStyles, useTheme } from '@/ui/theme';
+import { font, makeStyles, radius, useTheme } from '@/ui/theme';
 
 export default function ProfileScreen() {
   const profile = useMyProfile();
@@ -53,8 +53,9 @@ export default function ProfileScreen() {
           accessibilityLabel={t.profile.darkMode}
           value={theme.name === 'dark'}
           onValueChange={(dark) => theme.setTheme(dark ? 'dark' : 'light')}
-          trackColor={{ true: theme.colors.primary, false: theme.colors.border }}
-          thumbColor={theme.colors.surface}
+          trackColor={{ true: theme.colors.primary, false: theme.colors.switchOff }}
+          thumbColor="#FFFFFF"
+          style={styles.switch}
         />
       </View>
       <Button label={t.profile.logout} variant="secondary" onPress={confirmLogout} />
@@ -83,8 +84,10 @@ const useStyles = makeStyles((c) => ({
     backgroundColor: c.surface,
     borderWidth: 1,
     borderColor: c.border,
-    borderRadius: 14,
+    borderRadius: radius.control,
     paddingHorizontal: 16,
   },
-  rowLabel: { fontSize: 20, fontWeight: '600', color: c.text },
+  rowLabel: { fontSize: font.body, fontWeight: '500', color: c.text },
+  // a bit larger than the platform default; easier to hit
+  switch: { transform: [{ scale: 1.2 }] },
 }));

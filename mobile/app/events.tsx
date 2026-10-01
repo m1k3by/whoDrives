@@ -7,7 +7,7 @@ import { useEvents } from '@/features/events/hooks';
 import { useMyMembership } from '@/features/family/hooks';
 import { Body, Button, Loading, Screen } from '@/ui/components';
 import { t } from '@/ui/strings';
-import { makeStyles, useColors } from '@/ui/theme';
+import { font, makeStyles, useColors } from '@/ui/theme';
 
 export default function EventsScreen() {
   const styles = useStyles();
@@ -58,11 +58,11 @@ export default function EventsScreen() {
 
 const useStyles = makeStyles((c) => ({
   card: {
-    borderLeftWidth: 8,
+    borderLeftWidth: 4,
     paddingLeft: 16,
     paddingVertical: 12,
     gap: 4,
   },
-  title: { fontSize: 22, fontWeight: '700', color: c.text },
-  line: { fontSize: 18, color: c.muted },
+  title: { fontSize: font.heading, fontWeight: '600', color: c.text },
+  line: { fontSize: font.small, color: c.muted },
 }));

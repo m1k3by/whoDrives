@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { makeStyles, useColors } from './theme';
+import { font, makeStyles, radius, useColors } from './theme';
 
 // Large type and touch targets: the app is also used by grandparents.
 // Colors come from the theme (light/dark, see ./theme).
@@ -155,38 +155,38 @@ const useStyles = makeStyles((c) => ({
     justifyContent: 'center',
     backgroundColor: c.background,
   },
-  title: { fontSize: 32, fontWeight: '700', color: c.text },
-  body: { fontSize: 20, lineHeight: 28, color: c.text },
+  title: { fontSize: font.title, fontWeight: '700', letterSpacing: -0.3, color: c.text },
+  body: { fontSize: font.body, lineHeight: 26, color: c.text },
   error: { color: c.error },
   field: { gap: 8 },
-  label: { fontSize: 20, fontWeight: '600', color: c.text },
+  label: { fontSize: font.small, fontWeight: '600', color: c.muted },
   input: {
-    fontSize: 22,
-    minHeight: 60,
+    fontSize: font.body,
+    minHeight: 56,
     borderWidth: 1,
     borderColor: c.border,
     backgroundColor: c.surface,
-    borderRadius: 14,
+    borderRadius: radius.control,
     paddingHorizontal: 16,
     color: c.text,
   },
   button: {
-    minHeight: 60,
-    borderRadius: 14,
+    minHeight: 56,
+    borderRadius: radius.control,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 20,
   },
   buttonPrimary: { backgroundColor: c.primary },
   buttonSecondary: { backgroundColor: c.surface, borderWidth: 1, borderColor: c.border },
-  buttonLabel: { fontSize: 22, fontWeight: '700', color: c.onPrimary },
+  buttonLabel: { fontSize: font.body, fontWeight: '600', color: c.onPrimary },
   buttonLabelSecondary: { color: c.primary },
   pressed: { opacity: 0.7 },
   chipGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   chip: {
     flexGrow: 1,
     minHeight: 52,
-    borderRadius: 12,
+    borderRadius: radius.control,
     borderWidth: 1,
     borderColor: c.border,
     backgroundColor: c.surface,
@@ -194,6 +194,6 @@ const useStyles = makeStyles((c) => ({
     justifyContent: 'center',
   },
   chipSelected: { backgroundColor: c.primary, borderColor: c.primary },
-  chipLabel: { fontSize: 20, color: c.text, fontWeight: '600' },
+  chipLabel: { fontSize: font.body, color: c.text, fontWeight: '500' },
   chipLabelSelected: { color: c.onPrimary },
 }));

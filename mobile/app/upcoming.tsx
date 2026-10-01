@@ -8,7 +8,7 @@ import { useOccurrences } from '@/features/occurrences/hooks';
 import { OccurrenceItem } from '@/features/occurrences/OccurrenceItem';
 import { Body, Button, Chip, ChipGrid, Loading, Screen } from '@/ui/components';
 import { t } from '@/ui/strings';
-import { makeStyles } from '@/ui/theme';
+import { font, makeStyles } from '@/ui/theme';
 
 const FILTERS: OccurrenceFilter[] = ['all', 'open', 'mine'];
 
@@ -67,5 +67,5 @@ export default function UpcomingScreen() {
 
 const useStyles = makeStyles((c) => ({
   day: { gap: 10 },
-  dayLabel: { fontSize: 20, fontWeight: '700', color: c.muted, marginTop: 8 },
+  dayLabel: { fontSize: font.small, fontWeight: '600', color: c.muted, marginTop: 8 },
 }));

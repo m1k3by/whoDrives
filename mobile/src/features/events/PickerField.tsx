@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Modal, Pressable, Text, View } from 'react-native';
-import { makeStyles } from '@/ui/theme';
+import { font, makeStyles, radius } from '@/ui/theme';
 
 /**
  * Looks like a text field, but opens a popup to choose the value (date, time).
@@ -55,17 +55,17 @@ export function PickerField({
 
 const useStyles = makeStyles((c) => ({
   field: { gap: 8 },
-  label: { fontSize: 20, fontWeight: '600', color: c.text },
+  label: { fontSize: font.small, fontWeight: '600', color: c.muted },
   input: {
-    minHeight: 60,
+    minHeight: 56,
     borderWidth: 1,
     borderColor: c.border,
     backgroundColor: c.surface,
-    borderRadius: 14,
+    borderRadius: radius.control,
     paddingHorizontal: 16,
     justifyContent: 'center',
   },
-  value: { fontSize: 22, color: c.text },
+  value: { fontSize: font.body, color: c.text },
   placeholder: { color: c.muted },
   backdrop: {
     flex: 1,
@@ -73,5 +73,5 @@ const useStyles = makeStyles((c) => ({
     justifyContent: 'center',
     padding: 12,
   },
-  sheet: { backgroundColor: c.surface, borderRadius: 20, padding: 16, gap: 12 },
+  sheet: { backgroundColor: c.surface, borderRadius: 22, padding: 20, gap: 12 },
 }));

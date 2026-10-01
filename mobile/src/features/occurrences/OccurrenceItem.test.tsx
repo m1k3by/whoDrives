@@ -134,7 +134,7 @@ test('cancelled or past occurrences cannot be taken', async () => {
   expect(screen.queryByText('Ich übernehme')).toBeNull();
 });
 
-test('tapping the place opens it in Google Maps', async () => {
+test('tapping the place opens it in the map app', async () => {
   const open = jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
   await show(
     occurrence({
@@ -145,7 +145,7 @@ test('tapping the place opens it in Google Maps', async () => {
 
   await fireEvent.press(screen.getByText('Reitstall Sonnenhof, Waldweg 3'));
   expect(open).toHaveBeenCalledWith(
-    'https://www.google.com/maps/search/?api=1&query=Reitstall%20Sonnenhof%2C%20Waldweg%203',
+    expect.stringContaining('q=Reitstall%20Sonnenhof%2C%20Waldweg%203'),
   );
 });
 

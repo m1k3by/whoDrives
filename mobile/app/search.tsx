@@ -9,7 +9,7 @@ import { OccurrenceItem } from '@/features/occurrences/OccurrenceItem';
 import { searchOccurrences } from '@/features/occurrences/search';
 import { Body, Loading, Screen } from '@/ui/components';
 import { t } from '@/ui/strings';
-import { makeStyles } from '@/ui/theme';
+import { font, makeStyles, radius } from '@/ui/theme';
 
 const MAX_RESULTS = 50;
 
@@ -66,15 +66,15 @@ export default function SearchScreen() {
 
 const useStyles = makeStyles((c) => ({
   input: {
-    fontSize: 22,
-    minHeight: 60,
+    fontSize: font.body,
+    minHeight: 56,
     borderWidth: 1,
     borderColor: c.border,
     backgroundColor: c.surface,
-    borderRadius: 14,
+    borderRadius: radius.control,
     paddingHorizontal: 16,
     color: c.text,
   },
   day: { gap: 10 },
-  dayLabel: { fontSize: 20, fontWeight: '700', color: c.muted, marginTop: 8 },
+  dayLabel: { fontSize: font.small, fontWeight: '600', color: c.muted, marginTop: 8 },
 }));

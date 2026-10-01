@@ -4,7 +4,7 @@ import { t } from '@/ui/strings';
 
 import { dayKey, monthGrid } from './month';
 import { toneColor, type Tone } from './tone';
-import { makeStyles, useColors } from '@/ui/theme';
+import { font, makeStyles, useColors } from '@/ui/theme';
 
 // Building blocks shared by the home calendar and the date picker field.
 
@@ -150,24 +150,24 @@ function ArrowButton({
 
 const useStyles = makeStyles((c) => ({
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  monthLabel: { fontSize: 24, fontWeight: '700', color: c.text },
+  monthLabel: { fontSize: font.heading, fontWeight: '600', color: c.text },
   arrow: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    borderWidth: 2,
-    borderColor: c.primary,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    borderWidth: 1,
+    borderColor: c.border,
     alignItems: 'center',
     justifyContent: 'center',
   },
   arrowDisabled: { opacity: 0.3 },
-  arrowLabel: { fontSize: 32, lineHeight: 36, color: c.primary, fontWeight: '700' },
+  arrowLabel: { fontSize: 28, lineHeight: 32, color: c.primary, fontWeight: '400' },
   week: { flexDirection: 'row' },
   weekday: {
     flex: 1,
     textAlign: 'center',
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 14,
+    fontWeight: '600',
     color: c.muted,
     paddingVertical: 8,
   },
@@ -179,10 +179,10 @@ const useStyles = makeStyles((c) => ({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  today: { borderWidth: 2, borderColor: c.primary },
+  today: { borderWidth: 1.5, borderColor: c.primary },
   selected: { backgroundColor: c.primary },
-  dayNumber: { fontSize: 20, color: c.text },
-  selectedNumber: { color: c.onPrimary, fontWeight: '700' },
+  dayNumber: { fontSize: font.body, color: c.text },
+  selectedNumber: { color: c.onPrimary, fontWeight: '600' },
   dots: { flexDirection: 'row', gap: 3, height: 10, alignItems: 'center' },
-  dot: { width: 8, height: 8, borderRadius: 4 },
+  dot: { width: 6, height: 6, borderRadius: 3 },
 }));

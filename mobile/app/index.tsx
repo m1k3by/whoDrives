@@ -16,7 +16,7 @@ import { usePushRegistration } from '@/features/push/register';
 import { Body, Button, Field, Loading, Screen, Title } from '@/ui/components';
 import { MenuIcon, SearchIcon } from '@/ui/icons';
 import { t } from '@/ui/strings';
-import { makeStyles } from '@/ui/theme';
+import { font, makeStyles } from '@/ui/theme';
 
 export default function HomeScreen() {
   const styles = useStyles();
@@ -236,22 +236,26 @@ function ProfileButton() {
 
 const useStyles = makeStyles((c) => ({
   safe: { flex: 1, backgroundColor: c.background },
-  heading: { fontSize: 24, fontWeight: '700', color: c.text },
+  heading: { fontSize: font.heading, fontWeight: '600', color: c.text },
   // bottom padding keeps the last entry clear of the + button
-  dayList: { padding: 24, paddingBottom: 120, gap: 16 },
+  dayList: { padding: 20, paddingBottom: 120, gap: 14 },
   fab: {
     position: 'absolute',
     right: 20,
     bottom: 28,
-    width: 68,
-    height: 68,
-    borderRadius: 22,
+    width: 64,
+    height: 64,
+    borderRadius: 20,
     backgroundColor: c.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 4,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOpacity: 0.18,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 3 },
   },
-  fabLabel: { fontSize: 40, lineHeight: 44, color: c.onPrimary, fontWeight: '400' },
+  fabLabel: { fontSize: 34, lineHeight: 38, color: c.onPrimary, fontWeight: '300' },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -260,7 +264,7 @@ const useStyles = makeStyles((c) => ({
     paddingVertical: 6,
   },
   monthButton: { flex: 1, minHeight: 52, justifyContent: 'center', paddingHorizontal: 8 },
-  monthLabel: { fontSize: 22, fontWeight: '700', color: c.text },
+  monthLabel: { fontSize: font.heading, fontWeight: '600', color: c.text },
   headerButton: {
     minWidth: 52,
     minHeight: 52,
@@ -269,6 +273,6 @@ const useStyles = makeStyles((c) => ({
     justifyContent: 'center',
     borderRadius: 26,
   },
-  headerButtonLabel: { fontSize: 22, fontWeight: '700', color: c.primary },
+  headerButtonLabel: { fontSize: font.body, fontWeight: '600', color: c.primary },
   pressed: { opacity: 0.6 },
 }));

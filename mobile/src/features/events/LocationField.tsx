@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 import { Field } from '@/ui/components';
-import { makeStyles } from '@/ui/theme';
+import { font, makeStyles, radius } from '@/ui/theme';
 
 import { searchPlaces } from './places';
 
@@ -83,8 +83,8 @@ const useStyles = makeStyles((c) => ({
     backgroundColor: c.surface,
     borderWidth: 1,
     borderColor: c.border,
-    borderRadius: 12,
+    borderRadius: radius.control,
   },
-  suggestionText: { fontSize: 18, color: c.text },
+  suggestionText: { fontSize: font.small, color: c.text },
   pressed: { opacity: 0.7 },
 }));

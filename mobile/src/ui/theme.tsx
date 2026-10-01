@@ -12,7 +12,8 @@ const light = {
   text: '#1F2328',
   muted: '#5B6270',
   icon: '#5B6270',
-  border: '#C4C9D1',
+  border: '#D3D8DF', // soft: lines separate, they do not frame
+  switchOff: '#B4BBC6',
   primary: '#3B4BC8',
   onPrimary: '#FFFFFF',
   error: '#C62828',
@@ -29,7 +30,8 @@ const dark: Palette = {
   text: '#ECEFF4',
   muted: '#9AA3B2',
   icon: '#9AA3B2',
-  border: '#444A55',
+  border: '#363B44',
+  switchOff: '#565D69',
   primary: '#8FA8FF',
   onPrimary: '#1E2126',
   error: '#FF8A8A',
@@ -39,6 +41,21 @@ const dark: Palette = {
 };
 
 export const palettes: Record<ThemeName, Palette> = { light, dark };
+
+/**
+ * One scale for the whole app: large enough for grandparents, calm enough to look fine.
+ * Use these instead of new numbers.
+ */
+export const font = { title: 28, heading: 21, body: 18, small: 16 } as const;
+export const radius = { card: 18, control: 14 } as const;
+/** Soft lift for cards instead of a frame */
+export const raised = {
+  elevation: 2,
+  shadowColor: '#000',
+  shadowOpacity: 0.06,
+  shadowRadius: 8,
+  shadowOffset: { width: 0, height: 2 },
+} as const;
 
 const STORAGE_KEY = 'whodrives.theme';
 

@@ -110,7 +110,6 @@ export const t = {
     kindLabel: 'Art',
     kinds: { ride: 'Fahrt', pickup: 'Abholen', care: 'Betreuung', other: 'Sonstiges' },
     childLabel: 'Für welche Kinder?',
-    childHint: 'Mehrere möglich – ein Termin, eine Person fährt alle.',
     childSelected: (name: string) => `✓ ${name}`,
     noChildren: 'Lege zuerst unter „Kinder“ ein Kind an.',
     locationLabel: 'Wo? (optional)',
@@ -149,7 +148,7 @@ export const t = {
     },
   },
   occurrences: {
-    openMaps: 'Öffnet den Ort in Google Maps',
+    openMaps: 'Öffnet den Ort in der Karten-App',
     addToCalendar: 'In meinen Kalender',
     today: 'Heute',
     tomorrow: 'Morgen',

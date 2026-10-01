@@ -1,8 +1,8 @@
-import { Alert, Linking, Pressable, Text, View } from 'react-native';
+import { Alert, Pressable, Text, View } from 'react-native';
 
 import { addToPhoneCalendar, occurrenceEntry } from '@/features/events/calendar';
 import { childNames } from '@/features/events/form';
-import { mapsUrl } from '@/lib/links';
+import { openInMaps } from '@/lib/links';
 
 import { Button } from '@/ui/components';
 import { t } from '@/ui/strings';
@@ -16,7 +16,7 @@ import {
   useReleaseOccurrence,
   type Occurrence,
 } from './hooks';
-import { makeStyles, useColors } from '@/ui/theme';
+import { font, makeStyles, radius, raised, useColors } from '@/ui/theme';
 
 /**
  * One occurrence in a list: who takes it, "Ich übernehme" / "Freigeben".
@@ -96,7 +96,7 @@ export function OccurrenceItem({
         <Text
           accessibilityRole="link"
           accessibilityHint={t.occurrences.openMaps}
-          onPress={() => Linking.openURL(mapsUrl(o.events!.location!))}
+          onPress={() => openInMaps(o.events!.location!)}
           style={styles.location}
         >
           {o.events.location}
@@ -170,26 +170,26 @@ export function OccurrenceItem({
 }
 
 const useStyles = makeStyles((c) => ({
-  location: { fontSize: 18, color: c.primary, textDecorationLine: 'underline' },
+  location: { fontSize: font.small, color: c.primary, fontWeight: '500' },
   // card on the grey background; the colored left edge shows the status
   item: {
     backgroundColor: c.surface,
-    borderRadius: 14,
-    borderLeftWidth: 6,
-    paddingLeft: 14,
-    paddingRight: 12,
-    paddingVertical: 12,
-    gap: 4,
+    borderRadius: radius.card,
+    borderLeftWidth: 4,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    gap: 6,
+    ...raised,
   },
   kids: { flexDirection: 'row', flexWrap: 'wrap', columnGap: 16, rowGap: 4 },
   kid: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  kidName: { fontSize: 18, color: c.text },
-  childDot: { width: 14, height: 14, borderRadius: 7 },
+  kidName: { fontSize: font.small, color: c.muted },
+  childDot: { width: 10, height: 10, borderRadius: 5 },
   cancelled: { opacity: 0.55 },
   strike: { textDecorationLine: 'line-through' },
-  title: { fontSize: 22, fontWeight: '600', color: c.text },
-  line: { fontSize: 18, color: c.muted },
-  status: { fontSize: 20, fontWeight: '700' },
+  title: { fontSize: font.heading, fontWeight: '600', color: c.text },
+  line: { fontSize: font.small, color: c.muted },
+  status: { fontSize: font.small, fontWeight: '600' },
   actions: { gap: 8, marginTop: 4 },
-  error: { fontSize: 18, color: c.error },
+  error: { fontSize: font.small, color: c.error },
 }));

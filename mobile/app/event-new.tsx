@@ -66,7 +66,6 @@ export default function NewEventScreen() {
 
       <Text style={styles.label}>{t.events.childLabel}</Text>
       {children.data?.length === 0 && <Body>{t.events.noChildren}</Body>}
-      {(children.data?.length ?? 0) > 1 && <Body>{t.events.childHint}</Body>}
       {children.data?.map((c) => {
         const chosen = form.childIds.includes(c.id);
         return (
