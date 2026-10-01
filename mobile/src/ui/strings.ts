@@ -25,8 +25,7 @@ export const t = {
     logout: 'Abmelden',
     logoutTitle: 'Abmelden?',
     logoutText: 'Zum erneuten Anmelden brauchst du wieder einen Code per E-Mail.',
-    appearance: 'Darstellung',
-    themes: { light: 'Hell', dark: 'Dunkel' },
+    darkMode: 'Dark Mode',
     privacy: 'Datenschutzerklärung',
     delete: 'Konto löschen',
     deleteTitle: 'Konto endgültig löschen?',
@@ -103,6 +102,7 @@ export const t = {
   },
   events: {
     title: 'Termine verwalten',
+    addSeriesToCalendar: 'In meinen Kalender',
     none: 'Noch keine Termine angelegt.',
     new: 'Neuer Termin',
     titleLabel: 'Was?',
@@ -147,6 +147,8 @@ export const t = {
     },
   },
   occurrences: {
+    openMaps: 'Öffnet den Ort in Google Maps',
+    addToCalendar: 'In meinen Kalender',
     today: 'Heute',
     tomorrow: 'Morgen',
     cancelled: 'Abgesagt',

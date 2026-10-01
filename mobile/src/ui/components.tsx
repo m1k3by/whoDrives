@@ -1,6 +1,8 @@
-import type { ReactNode } from 'react';
+import { HeaderHeightContext } from 'expo-router/react-navigation';
+import { type ReactNode, useContext } from 'react';
 import {
   ActivityIndicator,
+  KeyboardAvoidingView,
   Pressable,
   ScrollView,
   Text,
@@ -17,11 +19,20 @@ import { makeStyles, useColors } from './theme';
 
 export function Screen({ children }: { children: ReactNode }) {
   const styles = useStyles();
+  // Android draws edge-to-edge, so the window does not shrink for the keyboard: make room
+  // below the content instead, so every field can be scrolled above the keyboard.
+  const headerHeight = useContext(HeaderHeightContext) ?? 0;
   return (
     <SafeAreaView style={styles.safe}>
-      <ScrollView contentContainerStyle={styles.screen} keyboardShouldPersistTaps="handled">
-        {children}
-      </ScrollView>
+      <KeyboardAvoidingView
+        behavior="padding"
+        keyboardVerticalOffset={headerHeight}
+        style={styles.fill}
+      >
+        <ScrollView contentContainerStyle={styles.screen} keyboardShouldPersistTaps="handled">
+          {children}
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -136,6 +147,7 @@ export function Loading() {
 
 const useStyles = makeStyles((c) => ({
   safe: { flex: 1, backgroundColor: c.background },
+  fill: { flex: 1 },
   screen: { padding: 24, gap: 20 },
   center: {
     flex: 1,

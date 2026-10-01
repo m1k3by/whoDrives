@@ -17,14 +17,16 @@ jest.mock('@/features/invites/hooks', () => ({
   }),
 }));
 
-test('shared invitation contains the install link with the code and the code itself', async () => {
+test('shared invitation contains the Play Store link and the code', async () => {
   const share = jest.spyOn(Share, 'share').mockResolvedValue({ action: 'sharedAction' });
   await render(<InviteScreen />);
 
   await fireEvent.press(screen.getByText('Einladung teilen'));
 
   const message = share.mock.calls[0][0].message;
-  expect(message).toContain('https://michael-stoecker.com/whodrives/app.html#ABCD2345');
+  expect(message).toContain(
+    'https://play.google.com/store/apps/details?id=com.michael_stoecker.whodrives',
+  );
   expect(message).toContain('Einladungscode eingeben: ABCD-2345');
   expect(message).toContain('„Familie Muster“');
 });

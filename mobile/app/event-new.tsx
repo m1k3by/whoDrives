@@ -10,6 +10,7 @@ import {
   type FormError,
 } from '@/features/events/form';
 import { useChildren, useCreateEvent } from '@/features/events/hooks';
+import { LocationField } from '@/features/events/LocationField';
 import { TimeField } from '@/features/events/TimeField';
 import { useMyMembership } from '@/features/family/hooks';
 import { fromDayKey } from '@/features/occurrences/month';
@@ -87,12 +88,11 @@ export default function NewEventScreen() {
         ))}
       </View>
 
-      <Field
+      <LocationField
         label={t.events.locationLabel}
         placeholder={t.events.locationPlaceholder}
         value={form.location}
-        onChangeText={(location) => set({ location })}
-        maxLength={100}
+        onChange={(location) => set({ location })}
       />
 
       <Text style={styles.label}>{t.events.repeatLabel}</Text>

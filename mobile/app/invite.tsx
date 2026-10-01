@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Share, Text } from 'react-native';
 
 import { formatInviteCode, useCreateInvite, type FamilyRole } from '@/features/invites/hooks';
-import { inviteLink } from '@/lib/links';
+import { STORE_URL } from '@/lib/links';
 import { Body, Button, Screen } from '@/ui/components';
 import { t } from '@/ui/strings';
 import { makeStyles } from '@/ui/theme';
@@ -30,12 +30,7 @@ export default function InviteScreen() {
           label={t.invite.share}
           onPress={() =>
             Share.share({
-              message: t.invite.shareMessage(
-                familyName,
-                code,
-                validUntil,
-                inviteLink(invite.data.code),
-              ),
+              message: t.invite.shareMessage(familyName, code, validUntil, STORE_URL),
             })
           }
         />

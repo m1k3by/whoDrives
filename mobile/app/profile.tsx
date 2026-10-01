@@ -1,20 +1,19 @@
 import * as Linking from 'expo-linking';
-import { Alert } from 'react-native';
+import { Alert, Switch, Text, View } from 'react-native';
 
 import { NameForm } from '@/features/profile/NameForm';
 import { useDeleteAccount, useLogout, useMyProfile } from '@/features/profile/hooks';
 import { PRIVACY_URL } from '@/lib/links';
-import { Body, Button, Chip, ChipGrid, Loading, Screen } from '@/ui/components';
+import { Body, Button, Loading, Screen } from '@/ui/components';
 import { t } from '@/ui/strings';
-import { type ThemeName, useTheme } from '@/ui/theme';
-
-const THEMES: ThemeName[] = ['light', 'dark'];
+import { makeStyles, useTheme } from '@/ui/theme';
 
 export default function ProfileScreen() {
   const profile = useMyProfile();
   const logout = useLogout();
   const deleteAccount = useDeleteAccount();
   const theme = useTheme();
+  const styles = useStyles();
 
   if (profile.isPending) return <Loading />;
   if (profile.isError) {
@@ -48,18 +47,16 @@ export default function ProfileScreen() {
     <Screen>
       <Body>{t.profile.loggedInAs(profile.data.email)}</Body>
       <NameForm profileId={profile.data.id} initialName={profile.data.display_name} />
-      <Body>{t.profile.appearance}</Body>
-      <ChipGrid>
-        {THEMES.map((name) => (
-          <Chip
-            key={name}
-            basis="45%"
-            label={t.profile.themes[name]}
-            selected={theme.name === name}
-            onPress={() => theme.setTheme(name)}
-          />
-        ))}
-      </ChipGrid>
+      <View style={styles.row}>
+        <Text style={styles.rowLabel}>{t.profile.darkMode}</Text>
+        <Switch
+          accessibilityLabel={t.profile.darkMode}
+          value={theme.name === 'dark'}
+          onValueChange={(dark) => theme.setTheme(dark ? 'dark' : 'light')}
+          trackColor={{ true: theme.colors.primary, false: theme.colors.border }}
+          thumbColor={theme.colors.surface}
+        />
+      </View>
       <Button label={t.profile.logout} variant="secondary" onPress={confirmLogout} />
       <Button
         label={t.profile.privacy}
@@ -76,3 +73,18 @@ export default function ProfileScreen() {
     </Screen>
   );
 }
+
+const useStyles = makeStyles((c) => ({
+  row: {
+    minHeight: 60,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: c.surface,
+    borderWidth: 1,
+    borderColor: c.border,
+    borderRadius: 14,
+    paddingHorizontal: 16,
+  },
+  rowLabel: { fontSize: 20, fontWeight: '600', color: c.text },
+}));

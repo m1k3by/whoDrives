@@ -1,4 +1,7 @@
-import { Alert, Pressable, Text, View } from 'react-native';
+import { Alert, Linking, Pressable, Text, View } from 'react-native';
+
+import { addToPhoneCalendar, occurrenceEntry } from '@/features/events/calendar';
+import { mapsUrl } from '@/lib/links';
 
 import { Button } from '@/ui/components';
 import { t } from '@/ui/strings';
@@ -81,10 +84,37 @@ export function OccurrenceItem({
       <Text style={styles.line}>
         {cancelled
           ? t.occurrences.cancelled
-          : `${t.events.kinds[o.events?.kind ?? 'other']} · ${t.occurrences.until(timeLabel(new Date(o.ends_at)))}` +
-            (o.events?.location ? ` · ${o.events.location}` : '')}
+          : `${t.events.kinds[o.events?.kind ?? 'other']} · ${t.occurrences.until(timeLabel(new Date(o.ends_at)))}`}
       </Text>
+      {!cancelled && o.events?.location && (
+        <Text
+          accessibilityRole="link"
+          accessibilityHint={t.occurrences.openMaps}
+          onPress={() => Linking.openURL(mapsUrl(o.events!.location!))}
+          style={styles.location}
+        >
+          {o.events.location}
+        </Text>
+      )}
 
+      {!cancelled && !over && (
+        <Text
+          accessibilityRole="button"
+          onPress={() =>
+            addToPhoneCalendar(
+              occurrenceEntry({
+                title: o.events?.children ? `${title} (${o.events.children.first_name})` : title,
+                location: o.events?.location ?? null,
+                startsAt: o.starts_at,
+                endsAt: o.ends_at,
+              }),
+            ).catch(() => Alert.alert(t.common.genericError))
+          }
+          style={styles.location}
+        >
+          {t.occurrences.addToCalendar}
+        </Text>
+      )}
       {!cancelled && (
         <Text style={[styles.status, { color: toneColor(c, tone) }]}>
           {!claimed
@@ -134,6 +164,7 @@ export function OccurrenceItem({
 }
 
 const useStyles = makeStyles((c) => ({
+  location: { fontSize: 18, color: c.primary, textDecorationLine: 'underline' },
   // card on the grey background; the colored left edge shows the status
   item: {
     backgroundColor: c.surface,

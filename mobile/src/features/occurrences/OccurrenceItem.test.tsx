@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
-import { Alert, type AlertButton } from 'react-native';
+import { Alert, type AlertButton, Linking } from 'react-native';
 
 import type { Occurrence } from './hooks';
 import { OccurrenceItem } from './OccurrenceItem';
@@ -11,6 +11,11 @@ jest.setTimeout(60_000);
 const mockRpc = jest.fn();
 jest.mock('@/lib/supabase', () => ({
   supabase: { rpc: (...args: unknown[]) => mockRpc(...args) },
+}));
+
+const mockCreateEvent = jest.fn().mockResolvedValue({ action: 'done' });
+jest.mock('expo-calendar/legacy', () => ({
+  createEventInCalendarAsync: (...args: unknown[]) => mockCreateEvent(...args),
 }));
 
 beforeAll(() => jest.useFakeTimers({ now: new Date(2026, 9, 5, 12, 0) })); // Mon 05.10.2026
@@ -127,4 +132,31 @@ test('cancelled or past occurrences cannot be taken', async () => {
     OMA,
   );
   expect(screen.queryByText('Ich übernehme')).toBeNull();
+});
+
+test('tapping the place opens it in Google Maps', async () => {
+  const open = jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
+  await show(
+    occurrence({
+      events: { ...occurrence().events!, location: 'Reitstall Sonnenhof, Waldweg 3' },
+    }),
+    OMA,
+  );
+
+  await fireEvent.press(screen.getByText('Reitstall Sonnenhof, Waldweg 3'));
+  expect(open).toHaveBeenCalledWith(
+    'https://www.google.com/maps/search/?api=1&query=Reitstall%20Sonnenhof%2C%20Waldweg%203',
+  );
+});
+
+test('"In meinen Kalender" hands the occurrence to the phone calendar', async () => {
+  await show(occurrence(), OMA);
+
+  await fireEvent.press(screen.getByText('In meinen Kalender'));
+  expect(mockCreateEvent).toHaveBeenCalledWith({
+    title: 'Reiten (Lena)',
+    location: undefined,
+    startDate: new Date('2026-10-06T13:00:00Z'),
+    endDate: new Date('2026-10-06T14:00:00Z'),
+  });
 });

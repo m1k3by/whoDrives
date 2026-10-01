@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { type ReactNode, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useCreateFamily, useMyFamily } from '@/features/family/hooks';
 import { InvalidInviteError, useRedeemInvite } from '@/features/invites/hooks';
@@ -24,6 +24,8 @@ export default function HomeScreen() {
   const family = useMyFamily();
   const [selected, setSelected] = useState(startOfToday);
   const [calendarOpen, setCalendarOpen] = useState(true);
+  // Android draws under the navigation bar: keep list end and + button above it
+  const { bottom } = useSafeAreaInsets();
   // One live subscription for all occurrence lists while the family is shown
   useLiveOccurrences(family.data?.id);
   usePushRegistration(!!family.data);
@@ -67,7 +69,7 @@ export default function HomeScreen() {
       {calendarOpen && (
         <MonthCalendar familyId={family.data.id} selected={selected} onSelect={setSelected} />
       )}
-      <ScrollView contentContainerStyle={styles.dayList}>
+      <ScrollView contentContainerStyle={[styles.dayList, { paddingBottom: 120 + bottom }]}>
         <Text style={styles.heading}>{dayLabel(selected, new Date())}</Text>
         <DayList familyId={family.data.id} day={selected} myId={profile.data.id} />
       </ScrollView>
@@ -75,7 +77,7 @@ export default function HomeScreen() {
         accessibilityRole="button"
         accessibilityLabel={t.events.new}
         onPress={() => router.push({ pathname: '/event-new', params: { date: dayKey(selected) } })}
-        style={({ pressed }) => [styles.fab, pressed && styles.pressed]}
+        style={({ pressed }) => [styles.fab, { bottom: 28 + bottom }, pressed && styles.pressed]}
       >
         <Text style={styles.fabLabel}>+</Text>
       </Pressable>

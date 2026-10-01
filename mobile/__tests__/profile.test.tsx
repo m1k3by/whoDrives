@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react-native';
 import { Alert, type AlertButton } from 'react-native';
 
 import ProfileScreen from '../app/profile';
+import { ThemeProvider } from '@/ui/theme';
 
 // The first render loads React Native and can take >5 s on a cold run.
 jest.setTimeout(60_000);
@@ -16,6 +17,14 @@ jest.mock('@/features/profile/hooks', () => ({
   useLogout: () => jest.fn(),
   useDeleteAccount: () => ({ mutate: mockDelete, isPending: false, isError: false }),
   useUpdateDisplayName: () => ({ mutate: jest.fn(), isPending: false }),
+}));
+
+const mockStore: Record<string, string> = {};
+jest.mock('expo-secure-store', () => ({
+  getItemAsync: async (key: string) => mockStore[key] ?? null,
+  setItemAsync: async (key: string, value: string) => {
+    mockStore[key] = value;
+  },
 }));
 
 function pressAlertButton(text: string) {
@@ -44,4 +53,18 @@ test('account is deleted only after confirming', async () => {
 
   pressAlertButton('Endgültig löschen');
   expect(mockDelete).toHaveBeenCalledTimes(1);
+});
+
+test('dark mode is one switch and the choice is kept', async () => {
+  await render(
+    <ThemeProvider>
+      <ProfileScreen />
+    </ThemeProvider>,
+  );
+  const toggle = await screen.findByLabelText('Dark Mode');
+  expect(toggle.props.value).toBe(false);
+
+  await fireEvent(toggle, 'valueChange', true);
+  expect(screen.getByLabelText('Dark Mode').props.value).toBe(true);
+  expect(mockStore['whodrives.theme']).toBe('dark');
 });

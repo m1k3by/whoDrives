@@ -6,6 +6,10 @@ import HomeScreen from '../app/index';
 jest.setTimeout(60_000);
 
 const mockPush = jest.fn();
+jest.mock(
+  'react-native-safe-area-context',
+  () => require('react-native-safe-area-context/jest/mock').default,
+);
 jest.mock('expo-router', () => ({ router: { push: (path: string) => mockPush(path) } }));
 jest.mock('@/features/profile/hooks', () => ({
   useMyProfile: () => ({

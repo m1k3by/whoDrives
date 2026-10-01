@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
-import { Text, View } from 'react-native';
+import { Alert, Text, View } from 'react-native';
 
+import { addToPhoneCalendar, seriesEntry } from '@/features/events/calendar';
 import { describeSchedule } from '@/features/events/form';
 import { useEvents } from '@/features/events/hooks';
 import { useMyMembership } from '@/features/family/hooks';
@@ -37,6 +38,15 @@ export default function EventsScreen() {
             {t.events.kinds[e.kind]} · {e.duration_min} Min.
             {e.location ? ` · ${e.location}` : ''}
           </Text>
+          <Button
+            label={t.events.addSeriesToCalendar}
+            variant="secondary"
+            onPress={() =>
+              addToPhoneCalendar(seriesEntry({ ...e, childName: e.children?.first_name })).catch(
+                () => Alert.alert(t.common.genericError),
+              )
+            }
+          />
         </View>
       ))}
     </Screen>
