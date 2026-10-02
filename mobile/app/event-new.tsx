@@ -12,6 +12,7 @@ import {
 import { useChildren, useCreateEvent } from '@/features/events/hooks';
 import { LocationField } from '@/features/events/LocationField';
 import { TimeField } from '@/features/events/TimeField';
+import { readPrefill } from '@/features/events/voice';
 import { useMyMembership } from '@/features/family/hooks';
 import { fromDayKey } from '@/features/occurrences/month';
 import { Body, Button, Chip, ChipGrid, Field, Screen } from '@/ui/components';
@@ -26,8 +27,9 @@ const DURATIONS = Object.keys(t.events.durations).map(
 export default function NewEventScreen() {
   const styles = useStyles();
   const { family } = useMyMembership();
-  // Opened from the calendar's + button: start with the day selected there
-  const { date } = useLocalSearchParams<{ date?: string }>();
+  // date: day selected in the calendar; prefill: fields understood from a spoken sentence
+  const { date, prefill } = useLocalSearchParams<{ date?: string; prefill?: string }>();
+  const [spoken] = useState(() => readPrefill(prefill));
   const children = useChildren(family?.id);
   const create = useCreateEvent();
   const [error, setError] = useState<FormError | null>(null);
@@ -41,6 +43,7 @@ export default function NewEventScreen() {
     untilDate: '',
     time: '',
     durationMin: '60',
+    ...spoken,
   });
   const set = (patch: Partial<EventForm>) => setForm((f) => ({ ...f, ...patch }));
 
@@ -56,6 +59,7 @@ export default function NewEventScreen() {
 
   return (
     <Screen>
+      {prefill && <Body>{t.voice.check}</Body>}
       <Field
         label={t.events.titleLabel}
         placeholder={t.events.titlePlaceholder}

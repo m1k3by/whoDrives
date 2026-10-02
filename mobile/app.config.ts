@@ -32,6 +32,13 @@ const config: ExpoConfig = {
     'expo-router',
     'expo-secure-store',
     ['expo-notifications', { icon: './assets/notification-icon.png', color: '#3B4BC8' }],
+    [
+      'expo-speech-recognition',
+      {
+        microphonePermission: 'Who Drives? nutzt das Mikrofon, wenn du einen Termin sprichst.',
+        speechRecognitionPermission: 'Who Drives? wandelt deinen gesprochenen Termin in Text um.',
+      },
+    ],
   ],
   experiments: { typedRoutes: true },
   extra: { eas: { projectId: EAS_PROJECT_ID } },

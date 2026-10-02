@@ -72,15 +72,21 @@ test('"Heute" goes back to today after choosing another day', async () => {
   expect(screen.getByLabelText('5. Oktober').props.accessibilityState).toEqual({ selected: true });
 });
 
-test('the + button creates an event on the selected day', async () => {
+test('the + button asks how: typing opens the form on the selected day, speaking the voice screen', async () => {
   await render(<HomeScreen />);
 
   await fireEvent.press(screen.getByLabelText('14. Oktober'));
   await fireEvent.press(screen.getByLabelText('Neuer Termin'));
+  expect(mockPush).not.toHaveBeenCalled();
+  await fireEvent.press(screen.getByText('Eintippen'));
   expect(mockPush).toHaveBeenLastCalledWith({
     pathname: '/event-new',
     params: { date: '2026-10-14' },
   });
+
+  await fireEvent.press(screen.getByLabelText('Neuer Termin'));
+  await fireEvent.press(screen.getByText('Sprechen'));
+  expect(mockPush).toHaveBeenLastCalledWith('/event-voice');
 });
 
 test('menu and search open from the header', async () => {

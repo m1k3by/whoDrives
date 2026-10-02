@@ -77,6 +77,7 @@ function Gate() {
             ['invite', t.invite.title],
             ['events', t.events.title],
             ['event-new', t.events.new],
+            ['event-voice', t.voice.title],
             ['children', t.children.title],
             ['family', t.familyScreen.title],
             ['upcoming', t.calendar.upcoming],

@@ -49,7 +49,9 @@
   <li><strong>E-Mail-Versand</strong> für die Anmeldecodes: <span class="todo">[Dienst, z. B. Resend oder Brevo, mit Sitz/Serverstandort]</span></li>
   <li><strong>Google Play</strong> – Verteilung der App.</li>
   <li><strong>Photon (komoot GmbH)</strong> – Adressvorschläge beim Eintragen des Orts eines Termins. Übermittelt wird nur der eingetippte Suchtext (ab 3 Zeichen) und die IP-Adresse des Geräts, keine Kontodaten. <span class="todo">[PRÜFEN: Sitz/Serverstandort und Datenschutzhinweise von komoot]</span></li>
-  <li><strong>Google Maps</strong> – nur wenn du im Termin auf den Ort tippst: Der Ort wird an Google Maps übergeben und dort geöffnet.</li>
+  <li><strong>Karten-App des Handys</strong> – nur wenn du im Termin auf den Ort tippst: Der Ort wird an die Karten-App übergeben, die auf deinem Handy eingestellt ist (ohne Karten-App: Google Maps im Browser).</li>
+  <li><strong>Spracherkennung des Handys</strong> (bei Android meist Google) – nur wenn du einen Termin sprichst: Die Aufnahme wird vom Spracherkennungsdienst deines Handys in Text umgewandelt. Die App speichert keine Aufnahmen. <span class="todo">[PRÜFEN: Anbieter und Verarbeitung des Spracherkennungsdienstes]</span></li>
+  <li><strong>Anthropic PBC</strong> (USA) – nur wenn du einen Termin sprichst: Der erkannte Satz und die Vornamen der Kinder deiner Familie werden an die KI Claude geschickt, die daraus die Felder des Termin-Formulars ausfüllt. Gespeichert wird erst, wenn du das Formular selbst speicherst. <span class="todo">[PRÜFEN: Auftragsverarbeitung/Datenschutzbedingungen von Anthropic, Speicherdauer]</span></li>
 </ul>
 <p class="todo">[PRÜFEN: Grundlage der Übermittlung in die USA (Expo, Google), z. B. EU-US Data Privacy Framework oder Standardvertragsklauseln]</p>
 

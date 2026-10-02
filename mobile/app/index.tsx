@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { type ReactNode, useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useCreateFamily, useMyFamily } from '@/features/family/hooks';
@@ -24,6 +24,7 @@ export default function HomeScreen() {
   const family = useMyFamily();
   const [selected, setSelected] = useState(startOfToday);
   const [calendarOpen, setCalendarOpen] = useState(true);
+  const [choosing, setChoosing] = useState(false);
   // Android draws under the navigation bar: keep list end and + button above it
   const { bottom } = useSafeAreaInsets();
   // One live subscription for all occurrence lists while the family is shown
@@ -76,11 +77,45 @@ export default function HomeScreen() {
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={t.events.new}
-        onPress={() => router.push({ pathname: '/event-new', params: { date: dayKey(selected) } })}
+        onPress={() => setChoosing(true)}
         style={({ pressed }) => [styles.fab, { bottom: 28 + bottom }, pressed && styles.pressed]}
       >
         <Text style={styles.fabLabel}>+</Text>
       </Pressable>
+
+      {/* + asks how: speak the appointment or type it into the form */}
+      <Modal
+        visible={choosing}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setChoosing(false)}
+      >
+        <Pressable style={styles.backdrop} onPress={() => setChoosing(false)}>
+          <Pressable style={[styles.sheet, { paddingBottom: 24 + bottom }]}>
+            <Text style={styles.sheetTitle}>{t.voice.choose}</Text>
+            <Button
+              label={t.voice.speak}
+              onPress={() => {
+                setChoosing(false);
+                router.push('/event-voice');
+              }}
+            />
+            <Button
+              label={t.voice.type}
+              variant="secondary"
+              onPress={() => {
+                setChoosing(false);
+                router.push({ pathname: '/event-new', params: { date: dayKey(selected) } });
+              }}
+            />
+            <Button
+              label={t.common.cancel}
+              variant="secondary"
+              onPress={() => setChoosing(false)}
+            />
+          </Pressable>
+        </Pressable>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -275,4 +310,13 @@ const useStyles = makeStyles((c) => ({
   },
   headerButtonLabel: { fontSize: font.body, fontWeight: '600', color: c.primary },
   pressed: { opacity: 0.6 },
+  backdrop: { flex: 1, justifyContent: 'flex-end', backgroundColor: c.backdrop },
+  sheet: {
+    backgroundColor: c.surface,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    gap: 12,
+  },
+  sheetTitle: { fontSize: font.heading, fontWeight: '600', color: c.text, marginBottom: 4 },
 }));

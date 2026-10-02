@@ -84,6 +84,25 @@ export const t = {
       `2. App öffnen, anmelden und diesen Einladungscode eingeben: ${code}\n\n` +
       `Der Code gilt bis ${date} und nur für dich.`,
   },
+  voice: {
+    title: 'Termin sprechen',
+    choose: 'Neuen Termin anlegen',
+    speak: 'Sprechen',
+    type: 'Eintippen',
+    intro: 'Tippe auf das Mikrofon und sag den Termin in einem Satz.',
+    example: 'Zum Beispiel: „Reiten mit Lena jeden Dienstag um 15 Uhr im Reitstall Sonnenhof“',
+    listening: 'Ich höre zu …',
+    micStart: 'Aufnahme starten',
+    micStop: 'Aufnahme beenden',
+    next: 'Weiter',
+    again: 'Nochmal sprechen',
+    notUnderstood: 'Das habe ich nicht verstanden. Bitte nochmal sprechen oder eintippen.',
+    noPermission:
+      'Ohne Mikrofon geht das nicht. Erlaube es in den Einstellungen oder tippe den Termin ein.',
+    unavailable: 'Spracheingabe ist auf diesem Handy nicht verfügbar.',
+    nothingHeard: 'Ich habe nichts gehört. Tippe nochmal auf das Mikrofon.',
+    check: 'Aus deiner Sprache übernommen – bitte prüfen und dann speichern.',
+  },
   children: {
     title: 'Kinder',
     none: 'Noch keine Kinder eingetragen.',

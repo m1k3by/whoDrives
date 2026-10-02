@@ -15,10 +15,11 @@ jest.mock('@/features/events/hooks', () => ({
   }),
   useCreateEvent: () => ({ mutate: mockMutate, isPending: false, isError: false }),
 }));
+jest.mock('@/lib/supabase', () => ({ supabase: {} }));
 jest.mock('@/features/family/hooks', () => ({
   useMyMembership: () => ({ family: { id: 'fam-1' } }),
 }));
-let mockParams: { date?: string } = {};
+let mockParams: { date?: string; prefill?: string } = {};
 jest.mock('expo-router', () => ({
   router: { back: jest.fn() },
   useLocalSearchParams: () => mockParams,
@@ -101,5 +102,18 @@ test('both children can be chosen for one appointment; tapping again removes one
     expect.objectContaining({ child_id: 'child-lena', child_ids: ['child-lena', 'child-tom'] }),
     expect.anything(),
   );
+  mockParams = {};
+});
+
+test('opened from voice input: the understood fields are filled in and marked for checking', async () => {
+  mockParams = {
+    prefill: JSON.stringify({ title: 'Reiten', childIds: ['child-tom'], time: '15:00' }),
+  };
+  await render(<NewEventScreen />);
+
+  expect(screen.getByText(/Aus deiner Sprache übernommen/)).toBeTruthy();
+  expect(screen.getByLabelText('Was?').props.value).toBe('Reiten');
+  expect(screen.getByText('✓ Tom')).toBeTruthy();
+  expect(screen.getByLabelText('Uhrzeit: 15:00 Uhr')).toBeTruthy();
   mockParams = {};
 });
